@@ -1,3 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game dengan Login Solana</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-base@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-phantom@latest/lib/index.iife.js"></script>
+</head>
+<body>
+    <div id="login-container" style="text-align: center; padding: 20px;">
+        <h2>Login dengan Wallet Solana</h2>
+        <button id="connect-button" onclick="connectWallet()">Connect Wallet</button>
+        <div id="wallet-info" style="display: none; margin-top: 20px;">
+            <p>Connected: <span id="wallet-address"></span></p>
+            <button onclick="disconnectWallet()">Disconnect</button>
+        </div>
+    </div>
+
+    <div id="game-container" style="display: none;"></div>
+
+    <script>
 let point = 0;
 let pointText;
 let ball;
@@ -6,6 +29,102 @@ let particles;
 let emitter;
 let bombVisible = false;
 let gameScene;
+let walletAddress = '';
+let wallet;
+let connection;
+
+// Konfigurasi Solana
+const SOLANA_NETWORK = 'https://api.devnet.solana.com'; // Ganti dengan mainnet jika perlu
+
+// Inisialisasi wallet adapter
+function initWallet() {
+    const { PhantomWalletAdapter } = window['@solana/wallet-adapter-phantom'];
+    wallet = new PhantomWalletAdapter();
+    
+    wallet.on('connect', (publicKey) => {
+        console.log('Connected to wallet:', publicKey.toBase58());
+        walletAddress = publicKey.toBase58();
+        document.getElementById('wallet-address').textContent = walletAddress;
+        document.getElementById('wallet-info').style.display = 'block';
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('game-container').style.display = 'block';
+        
+        // Load point dari blockchain setelah wallet terhubung
+        loadPointFromBlockchain();
+    });
+    
+    wallet.on('disconnect', () => {
+        console.log('Disconnected from wallet');
+        walletAddress = '';
+        document.getElementById('wallet-info').style.display = 'none';
+        document.getElementById('login-container').style.display = 'block';
+        document.getElementById('game-container').style.display = 'none';
+    });
+}
+
+// Connect wallet
+async function connectWallet() {
+    try {
+        if (!wallet.connected) {
+            await wallet.connect();
+        }
+    } catch (error) {
+        console.error('Error connecting wallet:', error);
+        alert('Error connecting wallet. Make sure Phantom wallet is installed.');
+    }
+}
+
+// Disconnect wallet
+async function disconnectWallet() {
+    try {
+        await wallet.disconnect();
+    } catch (error) {
+        console.error('Error disconnecting wallet:', error);
+    }
+}
+
+// Simpan point ke blockchain (menggunakan program Solana)
+async function savePointToBlockchain() {
+    if (!wallet.connected || !walletAddress) return false;
+    
+    try {
+        // Di sini Anda perlu berinteraksi dengan program Solana yang Anda buat
+        // Contoh sederhana: simpan di localStorage sebagai fallback
+        localStorage.setItem(`point_${walletAddress}`, point.toString());
+        
+        // Untuk implementasi nyata, Anda perlu:
+        // 1. Program Solana yang menyimpan data point
+        // 2. Transaction untuk update data
+        console.log('Point saved locally for wallet:', walletAddress);
+        return true;
+    } catch (error) {
+        console.error('Error saving point:', error);
+        return false;
+    }
+}
+
+// Load point dari blockchain
+async function loadPointFromBlockchain() {
+    if (!walletAddress) return 0;
+    
+    try {
+        // Coba load dari localStorage dulu
+        const savedPoint = localStorage.getItem(`point_${walletAddress}`);
+        if (savedPoint) {
+            point = parseInt(savedPoint);
+            if (pointText) {
+                pointText.setText(`Point: ${point}`);
+            }
+            return point;
+        }
+        
+        // Untuk implementasi nyata, load dari program Solana
+        return 0;
+    } catch (error) {
+        console.error('Error loading point:', error);
+        return 0;
+    }
+}
 
 const config = {
     type: Phaser.AUTO,
@@ -29,8 +148,8 @@ const game = new Phaser.Game(config);
 function preload() {
     this.load.image("background", "https://labs.phaser.io/assets/skies/space4.png");
     this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png");
-    this.load.image("bomb", "../assets/bomb.png");
-    this.load.image("sparkle", "../assets/blue.png");
+    this.load.image("bomb", "https://labs.phaser.io/assets/sprites/bomb.png");
+    this.load.image("sparkle", "https://labs.phaser.io/assets/particles/blue.png");
 }
 
 function create() {
@@ -90,16 +209,25 @@ function create() {
     bombVisible = false;
 
     // Tambahkan teks point
-    pointText = this.add.text(10, 10, "Point: 0", {
+    pointText = this.add.text(10, 10, `Point: ${point}`, {
         fontSize: "24px",
         fill: "#fff",
         fontStyle: "bold"
     });
 
+    // Tambahkan teks wallet address jika terhubung
+    const walletText = this.add.text(10, 40, `Wallet: ${walletAddress ? walletAddress.substring(0, 8) + '...' : 'Not connected'}`, {
+        fontSize: "12px",
+        fill: "#ccc"
+    });
+
     // Event saat bola di-tap atau di-klik
-    ball.on("pointerdown", () => {
+    ball.on("pointerdown", async () => {
         point++;
         pointText.setText(`Point: ${point}`);
+
+        // Simpan point ke blockchain
+        await savePointToBlockchain();
 
         // Pindahkan bola ke posisi acak dengan animasi
         const newX = Phaser.Math.Between(ballSize, this.sys.game.config.width - ballSize);
@@ -131,9 +259,12 @@ function create() {
     });
 
     // Event saat bom di-tap atau di-klik
-    bomb.on("pointerdown", () => {
+    bomb.on("pointerdown", async () => {
         point = Math.max(0, point - 5);
         pointText.setText(`Point: ${point}`);
+        
+        // Simpan point ke blockchain setelah dikurangi
+        await savePointToBlockchain();
         
         // Efek partikel merah untuk bom
         const bombEmitter = particles.createEmitter({
@@ -197,3 +328,16 @@ function showBomb() {
 }
 
 function update() {}
+
+// Inisialisasi wallet ketika halaman dimuat
+window.addEventListener('load', () => {
+    initWallet();
+    
+    // Cek jika wallet sudah terhubung sebelumnya
+    if (wallet.connected) {
+        wallet.connect().catch(console.error);
+    }
+});
+    </script>
+</body>
+</html>
