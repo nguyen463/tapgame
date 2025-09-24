@@ -1,4 +1,4 @@
-let point = 0;
+let score = 0;
 let scoreText;
 let ball;
 let particles;
