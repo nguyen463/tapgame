@@ -1,67 +1,100 @@
 let score = 0;
 let scoreText;
 let ball;
+let particles;
 
 const config = {
-  type: Phaser.AUTO,
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 400,
-    height: 600,
-  },
-  backgroundColor: "#87CEEB",
-  scene: {
-    preload: preload,
-    create: create,
-    update: update,
-  },
+    type: Phaser.AUTO,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 400,
+        height: 600
+    },
+    backgroundColor: "#87CEEB",
+    parent: 'game-container', // Menentukan wadah untuk canvas game
+    scene: {
+        preload: preload,
+        create: create,
+        update: update,
+    },
 };
 
 const game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image("ball", "../assets/ball.png");
+    this.load.image("background", "https://labs.phaser.io/assets/skies/space3.png");
+    this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png");
+    // Gambar partikel untuk efek kembang api
+    this.load.image("spark", "https://labs.phaser.io/assets/particles/red.png");
 }
 
 function create() {
-  // Define game constants at the top for clarity
-  const targetSize = this.sys.game.config.width / 6;
+    // Tambahkan background
+    const background = this.add.image(0, 0, "background").setOrigin(0, 0);
+    background.displayWidth = this.sys.game.config.width;
+    background.displayHeight = this.sys.game.config.height;
 
-  // Create the ball sprite
-  ball = this.add
-    .sprite(
-      this.sys.game.config.width / 2,
-      this.sys.game.config.height / 2,
-      "ball"
-    )
-    .setInteractive();
-  ball.setDisplaySize(targetSize, targetSize);
-
-  // Create the score text
-  scoreText = this.add.text(10, 10, "Score: 0", {
-    fontSize: "24px",
-    fill: "#000",
-  });
-
-  // Set up the tap event handler
-  ball.on("pointerdown", () => {
-    score++;
-    scoreText.setText(`Score: ${score}`); // Use template literals for cleaner string formatting
-
-    // Calculate new random position to avoid the ball going off-screen
-    const newX = Phaser.Math.Between(targetSize, this.sys.game.config.width - targetSize);
-    const newY = Phaser.Math.Between(targetSize, this.sys.game.config.height - targetSize);
-    
-    // Animate the ball to the new position for a smoother effect
-    this.tweens.add({
-      targets: ball,
-      x: newX,
-      y: newY,
-      duration: 100, // Duration in milliseconds
-      ease: 'Power1'
+    // Buat sistem partikel untuk efek kembang api
+    particles = this.add.particles("spark");
+    const emitter = particles.createEmitter({
+        speed: { min: 200, max: 400 },
+        angle: { min: 0, max: 360 },
+        scale: { start: 1, end: 0 },
+        alpha: { start: 1, end: 0 },
+        gravityY: 400,
+        lifespan: 1000,
+        quantity: 30,
+        active: false,
     });
-  });
+
+    // Sesuaikan ukuran bola
+    const ballSize = this.sys.game.config.width / 6;
+
+    // Buat bola yang bisa diklik
+    ball = this.add.sprite(
+        this.sys.game.config.width / 2,
+        this.sys.game.config.height / 2,
+        "ball"
+    ).setInteractive();
+    ball.setDisplaySize(ballSize, ballSize);
+
+    // Tambahkan teks skor
+    scoreText = this.add.text(10, 10, "Score: 0", {
+        fontSize: "24px",
+        fill: "#fff", // Ganti warna agar terlihat di background gelap
+        fontStyle: "bold"
+    });
+
+    // Event saat bola di-tap atau di-klik
+    ball.on("pointerdown", () => {
+        score++;
+        scoreText.setText(`Score: ${score}`);
+
+        // Pindahkan bola ke posisi acak dengan animasi
+        const newX = Phaser.Math.Between(ballSize, this.sys.game.config.width - ballSize);
+        const newY = Phaser.Math.Between(ballSize, this.sys.game.config.height - ballSize);
+
+        this.tweens.add({
+            targets: ball,
+            x: newX,
+            y: newY,
+            duration: 150, // Durasi animasi lebih cepat
+            ease: "Power1",
+        });
+
+        // Cek apakah skor mencapai kelipatan 100
+        if (score > 0 && score % 100 === 0) {
+            // Tampilkan kembang api di posisi acak
+            emitter.setPosition(
+                Phaser.Math.Between(0, this.sys.game.config.width),
+                Phaser.Math.Between(0, this.sys.game.config.height)
+            );
+            emitter.explode(50, emitter.x, emitter.y);
+        }
+    });
 }
 
-function update() {}
+function update() {
+    // Fungsi ini kosong karena semua logika game ada di event 'pointerdown'
+}
