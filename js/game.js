@@ -35,6 +35,7 @@ const config = {
         }
     },
     scene: {
+        key: 'main', // Tambahkan key untuk scene
         preload: preload,
         create: create,
         update: update
@@ -191,8 +192,8 @@ function levelUp() {
     levelDisplay.textContent = `Level: ${level}`;
     
     // Tambah target biru setiap naik level
-    if (game && game.scene && game.scene.scenes[0]) {
-        spawnBlueTarget(game.scene.scenes[0]);
+    if (game && game.scene && game.scene.keys.main) {
+        spawnBlueTarget(game.scene.keys.main);
     }
 }
 
@@ -217,8 +218,9 @@ function startGame() {
     if (!game) {
         game = new Phaser.Game(config);
     } else {
-        // Restart scene jika game sudah ada
-        game.scene.restart();
+        // Restart scene dengan cara yang benar
+        game.scene.stop('main');
+        game.scene.start('main');
     }
     
     // Mulai timer
