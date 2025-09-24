@@ -1,324 +1,296 @@
-// Variabel global game
-let game;
-let score = 0;
-let timeLeft = 60;
-let level = 1;
-let combo = 0;
-let maxCombo = 0;
-let highestLevel = 1;
-let isGameRunning = false;
-let timer;
-
-// Referensi elemen UI
-const scoreDisplay = document.getElementById('score-display');
-const timerDisplay = document.getElementById('timer-display');
-const levelDisplay = document.getElementById('level-display');
-const startScreen = document.getElementById('start-screen');
-const gameOverScreen = document.getElementById('game-over-screen');
-const finalScoreDisplay = document.getElementById('final-score');
-const highestLevelDisplay = document.getElementById('highest-level');
-const startButton = document.getElementById('start-button');
-const restartButton = document.getElementById('restart-button');
-
-// Deteksi ukuran layar
-function getScreenSize() {
-    const isMobile = window.innerWidth <= 768;
-    const width = isMobile ? window.innerWidth : 800;
-    const height = isMobile ? window.innerHeight : 600;
-    return { width, height, isMobile };
-}
-
-// Konfigurasi game Phaser
-function createGameConfig() {
-    const { width, height, isMobile } = getScreenSize();
+document.addEventListener('DOMContentLoaded', function() {
+    // Game variables
+    let game;
+    let score = 0;
+    let timeLeft = 60;
+    let level = 1;
+    let combo = 0;
+    let gameActive = false;
+    let targetInterval;
+    let timerInterval;
+    let highestLevel = 1;
     
-    return {
+    // DOM elements
+    const startScreen = document.getElementById('start-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const startButton = document.getElementById('start-button');
+    const restartButton = document.getElementById('restart-button');
+    const scoreDisplay = document.getElementById('score-display');
+    const timerDisplay = document.getElementById('timer-display');
+    const levelDisplay = document.getElementById('level-display');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const highestLevelDisplay = document.getElementById('highest-level');
+    
+    // Initialize Phaser game
+    const config = {
         type: Phaser.AUTO,
-        width: width,
-        height: height,
+        width: window.innerWidth,
+        height: window.innerHeight,
         parent: 'game-container',
-        backgroundColor: '#0f3460',
-        physics: {
-            default: 'arcade',
-            arcade: {
-                gravity: { y: 0 },
-                debug: false
-            }
-        },
-        scale: {
-            mode: Phaser.Scale.FIT,
-            autoCenter: Phaser.Scale.CENTER_BOTH
-        },
+        backgroundColor: '#16213e',
         scene: {
-            key: 'main',
             preload: preload,
             create: create,
             update: update
         }
     };
-}
-
-// Fungsi preload assets
-function preload() {
-    // Load gambar target
-    this.load.image('blueTarget', 'https://labs.phaser.io/assets/sprites/orb-blue.png');
-    this.load.image('redTarget', 'https://labs.phaser.io/assets/sprites/orb-red.png');
-    this.load.image('background', 'https://labs.phaser.io/assets/skies/space4.png');
-    this.load.image('particle', 'https://labs.phaser.io/assets/particles/blue.png');
-}
-
-// Fungsi create - inisialisasi game objects
-function create() {
-    const { width, height, isMobile } = getScreenSize();
     
-    // Tambahkan background
-    this.add.image(width / 2, height / 2, 'background').setDisplaySize(width, height);
-    
-    // Buat grup untuk target
-    this.blueTargets = this.physics.add.group();
-    this.redTargets = this.physics.add.group();
-    
-    // Buat partikel efek
-    this.particles = this.add.particles('particle');
-    
-    // Emitter untuk efek biru (target baik)
-    this.blueEmitter = this.particles.createEmitter({
-        speed: 100,
-        scale: { start: 0.5, end: 0 },
-        blendMode: 'ADD',
-        lifespan: 500,
-        on: false
-    });
-    
-    // Emitter untuk efek merah (target buruk)
-    this.redEmitter = this.particles.createEmitter({
-        speed: 100,
-        scale: { start: 0.5, end: 0 },
-        blendMode: 'ADD',
-        tint: 0xff0000,
-        lifespan: 500,
-        on: false
-    });
-    
-    // Event untuk menangani klik pada target (mobile friendly)
-    this.input.on('pointerdown', (pointer, gameObjects) => {
-        if (!isGameRunning) return;
-        
-        if (gameObjects.length > 0) {
-            const gameObject = gameObjects[0];
-            handleTargetClick(this, gameObject);
-        }
-    });
-    
-    // Juga tangani gameobjectdown untuk kompatibilitas
-    this.input.on('gameobjectdown', (pointer, gameObject) => {
-        if (!isGameRunning) return;
-        handleTargetClick(this, gameObject);
-    });
-    
-    // Spawn target biru awal
-    const initialTargets = isMobile ? 2 : 3;
-    for (let i = 0; i < initialTargets; i++) {
-        spawnBlueTarget(this);
+    // Game functions
+    function preload() {
+        // Preload assets if needed
     }
     
-    // Timer untuk spawn target merah
-    this.time.addEvent({
-        delay: isMobile ? 4000 : 5000, // Lebih cepat di mobile
-        callback: () => {
-            if (isGameRunning && this.redTargets.getLength() < (isMobile ? 1 : 2)) {
-                spawnRedTarget(this);
+    function create() {
+        // Create game elements
+        this.targets = this.add.group();
+        
+        // Input handling
+        this.input.on('gameobjectdown', function(pointer, gameObject) {
+            if (gameActive) {
+                handleTargetClick(gameObject);
             }
-        },
-        loop: true
+        });
+    }
+    
+    function update() {
+        // Game update logic
+    }
+    
+    // Start the game
+    startButton.addEventListener('click', function() {
+        startGame();
     });
-}
-
-// Fungsi untuk menangani klik target
-function handleTargetClick(scene, gameObject) {
-    if (gameObject.texture.key === 'blueTarget') {
-        // Kena target biru - tambah poin dan combo
-        combo++;
-        maxCombo = Math.max(maxCombo, combo);
-        score += level; // Poin berdasarkan level
-        scoreDisplay.textContent = `Skor: ${score}`;
+    
+    // Restart the game
+    restartButton.addEventListener('click', function() {
+        restartGame();
+    });
+    
+    function startGame() {
+        // Hide start screen
+        startScreen.style.display = 'none';
         
-        // Efek partikel
-        scene.blueEmitter.explode(10, gameObject.x, gameObject.y);
-        
-        // Hapus target dan buat yang baru
-        gameObject.destroy();
-        spawnBlueTarget(scene);
-        
-        // Cek jika perlu naik level
-        if (score % 20 === 0) {
-            levelUp();
-        }
-    } 
-    else if (gameObject.texture.key === 'redTarget') {
-        // Kena target merah - reset combo dan kurangi poin
+        // Reset game variables
+        score = 0;
+        timeLeft = 60;
+        level = 1;
         combo = 0;
-        score = Math.max(0, score - 5);
-        scoreDisplay.textContent = `Skor: ${score}`;
+        gameActive = true;
         
-        // Efek partikel
-        scene.redEmitter.explode(10, gameObject.x, gameObject.y);
+        // Update UI
+        updateUI();
         
-        // Hapus target
-        gameObject.destroy();
-    }
-}
-
-// Fungsi update - logika game loop
-function update() {
-    // Animasi rotasi target
-    this.blueTargets.getChildren().forEach(target => {
-        target.rotation += 0.01;
-    });
-    
-    this.redTargets.getChildren().forEach(target => {
-        target.rotation += 0.02;
-    });
-}
-
-// Fungsi untuk spawn target biru
-function spawnBlueTarget(scene) {
-    const { width, height, isMobile } = getScreenSize();
-    const margin = isMobile ? 40 : 50;
-    
-    const x = Phaser.Math.Between(margin, width - margin);
-    const y = Phaser.Math.Between(margin, height - margin);
-    
-    const target = scene.blueTargets.create(x, y, 'blueTarget');
-    target.setInteractive();
-    
-    // Sesuaikan ukuran target untuk mobile
-    const scale = isMobile ? 0.6 : 0.8;
-    target.setScale(scale);
-    
-    // Animasi muncul
-    scene.tweens.add({
-        targets: target,
-        scale: scale,
-        duration: 300,
-        ease: 'Back.easeOut'
-    });
-}
-
-// Fungsi untuk spawn target merah
-function spawnRedTarget(scene) {
-    const { width, height, isMobile } = getScreenSize();
-    const margin = isMobile ? 40 : 50;
-    
-    const x = Phaser.Math.Between(margin, width - margin);
-    const y = Phaser.Math.Between(margin, height - margin);
-    
-    const target = scene.redTargets.create(x, y, 'redTarget');
-    target.setInteractive();
-    
-    // Sesuaikan ukuran target untuk mobile
-    const scale = isMobile ? 0.6 : 0.8;
-    target.setScale(scale);
-    
-    // Animasi berdenyut
-    scene.tweens.add({
-        targets: target,
-        scale: scale * 0.9,
-        duration: 500,
-        yoyo: true,
-        repeat: -1
-    });
-}
-
-// Fungsi untuk meningkatkan level
-function levelUp() {
-    level++;
-    highestLevel = Math.max(highestLevel, level);
-    levelDisplay.textContent = `Level: ${level}`;
-    
-    // Tambah target biru setiap naik level
-    if (game && game.scene && game.scene.keys.main) {
-        spawnBlueTarget(game.scene.keys.main);
-    }
-}
-
-// Fungsi untuk memulai game
-function startGame() {
-    startScreen.style.display = 'none';
-    gameOverScreen.style.display = 'none';
-    isGameRunning = true;
-    
-    // Reset variabel game
-    score = 0;
-    timeLeft = 60;
-    level = 1;
-    combo = 0;
-    
-    // Update UI
-    scoreDisplay.textContent = `Skor: ${score}`;
-    timerDisplay.textContent = `Waktu: ${timeLeft}`;
-    levelDisplay.textContent = `Level: ${level}`;
-    
-    // Inisialisasi game Phaser jika belum ada
-    if (!game) {
-        game = new Phaser.Game(createGameConfig());
-    } else {
-        // Hancurkan game lama dan buat yang baru dengan ukuran yang benar
-        game.destroy(true);
-        game = new Phaser.Game(createGameConfig());
-    }
-    
-    // Mulai timer
-    clearInterval(timer);
-    timer = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = `Waktu: ${timeLeft}`;
+        // Start game timers
+        startTimers();
         
-        if (timeLeft <= 0) {
-            endGame();
+        // Initialize Phaser game if not already done
+        if (!game) {
+            game = new Phaser.Game(config);
         }
-    }, 1000);
-}
-
-// Fungsi untuk mengakhiri game
-function endGame() {
-    isGameRunning = false;
-    clearInterval(timer);
-    
-    // Tampilkan layar game over
-    gameOverScreen.style.display = 'flex';
-    finalScoreDisplay.textContent = `Skor: ${score}`;
-    highestLevelDisplay.textContent = highestLevel;
-}
-
-// Event listeners untuk tombol
-startButton.addEventListener('click', startGame);
-restartButton.addEventListener('click', startGame);
-
-// Handle resize window
-window.addEventListener('resize', () => {
-    if (game && isGameRunning) {
-        // Restart game dengan ukuran baru
-        game.scene.stop('main');
-        game.scene.start('main');
     }
-});
-
-// Inisialisasi saat halaman dimuat
-window.addEventListener('load', () => {
-    // Tidak langsung memulai game, tunggu klik pengguna
-    console.log('Game Tap-Tap siap dimainkan!');
     
-    // Prevent default touch behaviors
-    document.addEventListener('touchstart', function(e) {
-        if (e.touches.length > 1) {
-            e.preventDefault();
-        }
-    }, { passive: false });
+    function restartGame() {
+        // Hide game over screen
+        gameOverScreen.style.display = 'none';
+        
+        // Reset game variables
+        score = 0;
+        timeLeft = 60;
+        level = 1;
+        combo = 0;
+        gameActive = true;
+        
+        // Update UI
+        updateUI();
+        
+        // Start game timers
+        startTimers();
+    }
     
-    document.addEventListener('touchend', function(e) {
-        if (e.touches.length > 0) {
-            e.preventDefault();
+    function startTimers() {
+        // Clear any existing intervals
+        clearInterval(targetInterval);
+        clearInterval(timerInterval);
+        
+        // Start target spawning
+        targetInterval = setInterval(spawnTarget, 1000);
+        
+        // Start game timer
+        timerInterval = setInterval(function() {
+            timeLeft--;
+            updateUI();
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+    
+    function spawnTarget() {
+        if (game && game.scene && game.scene.scenes[0]) {
+            const scene = game.scene.scenes[0];
+            
+            // Determine target type (80% blue, 20% red)
+            const isBadTarget = Math.random() < 0.2;
+            const targetColor = isBadTarget ? 0xff0000 : 0x00a8ff;
+            
+            // Create target
+            const target = scene.add.circle(
+                Phaser.Math.Between(50, scene.sys.game.config.width - 50),
+                Phaser.Math.Between(100, scene.sys.game.config.height - 50),
+                30,
+                targetColor,
+                0.8
+            );
+            
+            // Make target interactive
+            target.setInteractive();
+            
+            // Add to targets group
+            scene.targets.add(target);
+            
+            // Set target properties
+            target.isBad = isBadTarget;
+            target.lifespan = 3000 - (level * 200); // Decrease with level
+            
+            // Animate target appearance
+            scene.tweens.add({
+                targets: target,
+                scaleX: 1.2,
+                scaleY: 1.2,
+                duration: 200,
+                yoyo: true,
+                ease: 'Back.out'
+            });
+            
+            // Remove target after lifespan
+            setTimeout(function() {
+                if (target.active) {
+                    target.destroy();
+                    if (!target.isBad) {
+                        // Reset combo if blue target disappears
+                        combo = 0;
+                    }
+                }
+            }, target.lifespan);
         }
-    }, { passive: false });
+    }
+    
+    function handleTargetClick(target) {
+        if (target.isBad) {
+            // Bad target - decrease score and reset combo
+            score = Math.max(0, score - 10);
+            combo = 0;
+            createParticles(target.x, target.y, '#ff0000');
+        } else {
+            // Good target - increase score and combo
+            score += 10 + (combo * 2);
+            combo++;
+            createParticles(target.x, target.y, '#00ff00');
+            
+            // Check for level up
+            if (score >= level * 100) {
+                levelUp();
+            }
+        }
+        
+        // Animate target destruction
+        if (game && game.scene && game.scene.scenes[0]) {
+            const scene = game.scene.scenes[0];
+            scene.tweens.add({
+                targets: target,
+                scaleX: 0,
+                scaleY: 0,
+                alpha: 0,
+                duration: 200,
+                onComplete: function() {
+                    target.destroy();
+                }
+            });
+        }
+        
+        // Update UI
+        updateUI();
+    }
+    
+    function levelUp() {
+        level++;
+        if (level > highestLevel) {
+            highestLevel = level;
+        }
+        
+        // Speed up target spawning
+        clearInterval(targetInterval);
+        const spawnRate = Math.max(300, 1000 - (level * 100));
+        targetInterval = setInterval(spawnTarget, spawnRate);
+        
+        // Visual feedback for level up
+        if (game && game.scene && game.scene.scenes[0]) {
+            const scene = game.scene.scenes[0];
+            scene.cameras.main.flash(200, 0, 255, 0);
+            scene.cameras.main.shake(100, 0.01);
+        }
+    }
+    
+    function updateUI() {
+        scoreDisplay.textContent = `Score: ${score}`;
+        timerDisplay.textContent = `Time: ${timeLeft}`;
+        levelDisplay.textContent = `Level: ${level}`;
+    }
+    
+    function endGame() {
+        gameActive = false;
+        
+        // Clear intervals
+        clearInterval(targetInterval);
+        clearInterval(timerInterval);
+        
+        // Clear all targets
+        if (game && game.scene && game.scene.scenes[0]) {
+            const scene = game.scene.scenes[0];
+            scene.targets.clear(true, true);
+        }
+        
+        // Show game over screen
+        finalScoreDisplay.textContent = `Score: ${score}`;
+        highestLevelDisplay.textContent = highestLevel;
+        gameOverScreen.style.display = 'flex';
+    }
+    
+    function createParticles(x, y, color) {
+        for (let i = 0; i < 10; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = '10px';
+            particle.style.height = '10px';
+            particle.style.backgroundColor = color;
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            document.getElementById('game-container').appendChild(particle);
+            
+            // Animate particle
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 50;
+            const targetX = x + Math.cos(angle) * distance;
+            const targetY = y + Math.sin(angle) * distance;
+            
+            particle.animate([
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                { transform: `translate(${targetX - x}px, ${targetY - y}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: 500 + Math.random() * 500,
+                easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+            }).onfinish = function() {
+                particle.remove();
+            };
+        }
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (game) {
+            game.scale.resize(window.innerWidth, window.innerHeight);
+        }
+    });
 });
