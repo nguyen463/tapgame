@@ -84,7 +84,7 @@ function create() {
         });
 
         // Cek apakah skor mencapai kelipatan 100
-        if (score > 0 && score % 100 === 0) {
+        if (score > 0 && score % 5 === 0) {
             // Tampilkan kembang api di posisi acak
             emitter.setPosition(
                 Phaser.Math.Between(0, this.sys.game.config.width),
