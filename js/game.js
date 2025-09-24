@@ -22,7 +22,7 @@ const game = new Phaser.Game(config);
 
 function preload() {
   // Pastikan path benar, kalau di folder assets sama level dengan index.html:
-  this.load.image("ball", "assets/ball.png");
+  this.load.image("ball", "/assets/ball.png");
 }
 
 function create() {
