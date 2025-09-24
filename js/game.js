@@ -21,7 +21,7 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image("monster", "assets/ball.png"); // ganti ke gambar kamu
+  this.load.image("ball", "assets/ball.png"); // ganti ke gambar kamu
 }
 
 function create() {
