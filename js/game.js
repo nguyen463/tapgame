@@ -1,10 +1,15 @@
 let score = 0;
 let scoreText;
+let monster;
 
 const config = {
   type: Phaser.AUTO,
-  width: 400,
-  height: 600,
+  scale: {
+    mode: Phaser.Scale.FIT,          // fit ke layar HP
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 400,
+    height: 600
+  },
   backgroundColor: "#87CEEB",
   scene: {
     preload: preload,
@@ -16,21 +21,36 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-  // Ganti ke asset kamu sendiri
-  this.load.image("ball", "../assets/ball.png");
+  this.load.image("monster", "../assets/monster.png"); // ganti ke gambar kamu
 }
 
 function create() {
-  const ball = this.add.sprite(200, 300, "ball").setInteractive();
+  // Tambah sprite
+  monster = this.add.sprite(config.width / 2, config.height / 2, "monster").setInteractive();
 
-  // Event tap
-  ball.on("pointerdown", () => {
+  // Atur ukuran kecil biar pas di mobile
+  const targetSize = config.width / 6;
+  monster.setDisplaySize(targetSize, targetSize);
+
+  // Event tap dengan animasi
+  monster.on("pointerdown", () => {
     score++;
     scoreText.setText("Score: " + score);
 
-    // Pindah posisi random
-    ball.x = Phaser.Math.Between(50, 350);
-    ball.y = Phaser.Math.Between(50, 550);
+    // Animasi: membesar lalu mengecil
+    this.tweens.add({
+      targets: monster,
+      scaleX: monster.scaleX * 1.3,
+      scaleY: monster.scaleY * 1.3,
+      duration: 150,
+      yoyo: true,
+      ease: "Bounce.easeOut",
+      onComplete: () => {
+        // Setelah animasi selesai → pindah posisi random
+        monster.x = Phaser.Math.Between(targetSize, config.width - targetSize);
+        monster.y = Phaser.Math.Between(targetSize, config.height - targetSize);
+      }
+    });
   });
 
   // Teks skor
@@ -41,4 +61,3 @@ function create() {
 }
 
 function update() {}
-
