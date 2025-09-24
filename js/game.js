@@ -45,11 +45,11 @@ function create() {
     // Konfigurasi emitter untuk efek kembang api yang lebih kompleks
     emitter = particles.createEmitter({
         // Kecepatan dan sudut menyebar dari titik ledakan
-        speed: { min: -200, max: 200 },
+        speed: { min: -100, max: 100 },
         angle: { min: 0, max: 360, steps: 32 },
         
         // Ukuran partikel mengecil seiring waktu
-        scale: { start: 0.8, end: 0 },
+        scale: { start: 0.8, end: 0, ease: 'Cubic.easeOut' },
         
         // Partikel memudar dan menghilang
         alpha: { start: 1, end: 0, ease: 'Cubic.easeOut' },
@@ -57,8 +57,8 @@ function create() {
         // Efek gravitasi agar partikel terlihat jatuh
         gravityY: 300,
         
-        // Partikel hidup hanya sebentar (1 detik)
-        lifespan: 1000,
+        // Partikel hidup hanya sebentar (1,5 detik)
+        lifespan: 1500,
         
         // Atur agar partikel meledak dari satu titik, bukan terus-menerus
         emitZone: {
@@ -66,12 +66,11 @@ function create() {
             source: new Phaser.Geom.Circle(0, 0, 1)
         },
         
-        quantity: 100, // Jumlah partikel yang meledak jauh lebih banyak
+        quantity: 150, // Jumlah partikel yang meledak lebih banyak
         
         active: false,
-        blendMode: 'SCREEN',
-        follow: ball, // Partikel mengikuti bola, jadi ledakan terjadi di posisi bola
-        frequency: -1 // Ini memastikan partikel hanya meledak sekali saat dipicu
+        blendMode: 'ADD', // Gunakan 'ADD' untuk efek pencahayaan yang lebih kuat
+        frequency: -1 // Memastikan partikel hanya meledak sekali saat dipicu
     });
 
     // Sesuaikan ukuran bola
@@ -111,8 +110,10 @@ function create() {
 
         // Cek apakah skor mencapai kelipatan 100
         if (score > 0 && score % 10 === 0) {
+            // Posisikan emitter di posisi bola
+            emitter.setPosition(ball.x, ball.y);
             // Ledakan partikel kembang api
-            emitter.explode(100, ball.x, ball.y);
+            emitter.explode(150);
         }
     });
 }
