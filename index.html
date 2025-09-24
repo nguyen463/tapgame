@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Game Tap-Tap Keren</title>
+    <title>Cool Tap-Tap Game</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <style>
         * {
@@ -244,36 +244,36 @@
 <body>
     <div id="game-container">
         <div id="ui-overlay">
-            <div id="score-display">Skor: 0</div>
-            <div id="timer-display">Waktu: 60</div>
+            <div id="score-display">Score: 0</div>
+            <div id="timer-display">Time: 60</div>
             <div id="level-display">Level: 1</div>
         </div>
         <div id="start-screen">
             <h1>TAP-TAP GAME</h1>
-            <p>Ketuk target yang muncul secepat mungkin! Dapatkan skor tertinggi sebelum waktu habis.</p>
+            <p>Tap the targets as quickly as possible! Get the highest score before time runs out.</p>
             
             <div class="instructions">
-                <h3>Cara Bermain:</h3>
+                <h3>How to Play:</h3>
                 <ul>
-                    <li>Klik target biru untuk mendapatkan poin</li>
-                    <li>Hindari target merah yang mengurangi poin</li>
-                    <li>Setiap level akan semakin menantang</li>
-                    <li>Dapatkan combo dengan mengetuk target berturut-turut</li>
+                    <li>Click blue targets to earn points</li>
+                    <li>Avoid red targets that reduce points</li>
+                    <li>Each level becomes more challenging</li>
+                    <li>Get combos by tapping targets consecutively</li>
                 </ul>
             </div>
             
-            <button id="start-button">MULAI PERMAINAN</button>
+            <button id="start-button">START GAME</button>
         </div>
         <div id="game-over-screen">
-            <h2>Permainan Selesai!</h2>
-            <p id="final-score">Skor: 0</p>
-            <p>Level Tertinggi: <span id="highest-level">1</span></p>
-            <button id="restart-button">MAIN LAGI</button>
+            <h2>Game Over!</h2>
+            <p id="final-score">Score: 0</p>
+            <p>Highest Level: <span id="highest-level">1</span></p>
+            <button id="restart-button">PLAY AGAIN</button>
         </div>
     </div>
     
     <noscript>
-        <p>Game ini membutuhkan JavaScript untuk berjalan. Mohon aktifkan di browser Anda.</p>
+        <p>This game requires JavaScript to run. Please enable it in your browser.</p>
     </noscript>
 
     <script src="js/game.js"></script>
