@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Tap Tap Game</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
-    <script src="js/game.js"></script>
     <style>
       body {
         margin: 0;
@@ -17,5 +16,8 @@
       }
     </style>
   </head>
-  <body></body>
+  <body>
+    <!-- ✅ game.js dipanggil setelah body -->
+    <script src="js/game.js"></script>
+  </body>
 </html>
