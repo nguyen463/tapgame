@@ -113,7 +113,7 @@ function create() {
         });
 
         // Cek apakah skor mencapai kelipatan 100
-        if (score > 0 && score % 100 === 0) {
+        if (score > 0 && score % 10 === 0) {
             // Posisikan emitter di posisi bola
             emitter.setPosition(ball.x, ball.y);
             // Ledakan partikel kembang api
