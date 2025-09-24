@@ -1,281 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Cool Tap-Tap Game</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Wallet Login & Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            margin: 0;
-            padding: 0;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            color: #fff;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-        
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 100%;
-            max-height: 100%;
-            box-shadow: none;
-            border-radius: 0;
-            overflow: hidden;
-        }
-        
-        #ui-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-        
-        #score-display, #timer-display, #level-display {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-        }
-        
-        #score-display {
-            top: 10px;
-            left: 10px;
-            color: #4cd137;
-        }
-        
-        #timer-display {
-            top: 10px;
-            right: 10px;
-            color: #e84118;
-        }
-        
-        #level-display {
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #00a8ff;
-        }
-        
-        #start-screen, #game-over-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 20;
-            text-align: center;
-            padding: 15px;
+            padding: 20px;
         }
         
-        #game-over-screen {
-            display: none;
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
         
         h1 {
-            font-size: 32px;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px #00f7ff;
-            color: #00f7ff;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        h2 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: #ff9ff3;
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
         }
         
-        button {
-            background: linear-gradient(135deg, #00f7ff 0%, #008cff 100%);
-            border: none;
-            padding: 12px 30px;
-            font-size: 18px;
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .wallet-info {
+            display: none;
+            width: 100%;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .wallet-info h3 {
+            margin-bottom: 10px;
+            color: #00dbde;
+        }
+        
+        .wallet-address {
+            word-break: break-all;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
             color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 20px;
-            pointer-events: auto;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.4);
+            transition: all 0.3s ease;
             font-weight: bold;
-            min-height: 50px;
-            min-width: 200px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
-        button:hover, button:active {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 247, 255, 0.6);
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
         
-        p {
-            font-size: 16px;
-            max-width: 90%;
-            text-align: center;
-            line-height: 1.4;
-            margin-bottom: 10px;
+        .btn:active {
+            transform: translateY(0);
         }
         
-        canvas {
-            display: block;
-            width: 100% !important;
-            height: 100% !important;
+        .btn-logout {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+        }
+        
+        .game-section {
+            display: none;
+        }
+        
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .game-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .cell.x {
+            color: #00dbde;
+        }
+        
+        .cell.o {
+            color: #fc00ff;
+        }
+        
+        .score {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .status {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            min-height: 30px;
+        }
+        
+        .winner {
+            color: #4cd137;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         .instructions {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
+            margin-top: 30px;
             text-align: left;
-            max-width: 90%;
-            font-size: 14px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
         }
         
         .instructions h3 {
-            color: #00f7ff;
-            margin-bottom: 8px;
-            text-align: center;
-            font-size: 18px;
+            margin-bottom: 10px;
+            color: #00dbde;
         }
         
-        .instructions ul {
-            padding-left: 15px;
+        .instructions ol {
+            padding-left: 20px;
         }
         
         .instructions li {
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
         
-        #final-score {
-            font-size: 40px;
-            color: #4cd137;
-            margin: 15px 0;
-            text-shadow: 0 0 10px rgba(76, 209, 55, 0.5);
+        footer {
+            margin-top: 30px;
+            opacity: 0.7;
+            font-size: 0.9rem;
         }
         
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        /* Landscape mode adjustments */
-        @media (orientation: landscape) {
-            #score-display, #timer-display, #level-display {
-                font-size: 14px;
-                padding: 6px 12px;
+        @media (max-width: 600px) {
+            .game-container {
+                grid-template-columns: 1fr;
             }
             
             h1 {
-                font-size: 28px;
-            }
-            
-            h2 {
-                font-size: 24px;
-            }
-            
-            button {
-                padding: 10px 25px;
-                font-size: 16px;
-                min-height: 45px;
-                min-width: 180px;
-            }
-            
-            .instructions {
-                max-height: 40vh;
-                overflow-y: auto;
-            }
-        }
-
-        /* Very small screens */
-        @media (max-width: 360px) {
-            h1 {
-                font-size: 28px;
-            }
-            
-            h2 {
-                font-size: 24px;
-            }
-            
-            #score-display, #timer-display, #level-display {
-                font-size: 12px;
-                padding: 5px 10px;
-            }
-            
-            button {
-                padding: 10px 20px;
-                font-size: 16px;
-                min-height: 45px;
-                min-width: 160px;
-            }
-            
-            p {
-                font-size: 14px;
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="ui-overlay">
-            <div id="score-display">Score: 0</div>
-            <div id="timer-display">Time: 60</div>
-            <div id="level-display">Level: 1</div>
-        </div>
-        <div id="start-screen">
-            <h1>TAP-TAP GAME</h1>
-            <p>Tap the targets as quickly as possible! Get the highest score before time runs out.</p>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-wallet"></i> Solana Wallet Login</h1>
+            <p class="subtitle">Login dengan wallet Solana dan mainkan game Tic-Tac-Toe</p>
+        </header>
+        
+        <div class="card login-section" id="loginSection">
+            <h2>Login dengan Solana Wallet</h2>
+            <p>Pilih wallet untuk login ke aplikasi</p>
             
-            <div class="instructions">
-                <h3>How to Play:</h3>
-                <ul>
-                    <li>Click blue targets to earn points</li>
-                    <li>Avoid red targets that reduce points</li>
-                    <li>Each level becomes more challenging</li>
-                    <li>Get combos by tapping targets consecutively</li>
-                </ul>
+            <div class="wallet-info" id="walletInfo">
+                <h3>Wallet Terhubung</h3>
+                <p>Alamat Wallet:</p>
+                <div class="wallet-address" id="walletAddress"></div>
+                <p>Saldo: <span id="walletBalance">0</span> SOL</p>
             </div>
             
-            <button id="start-button">START GAME</button>
+            <button class="btn" id="connectButton">
+                <i class="fas fa-plug"></i> Connect Wallet
+            </button>
+            <button class="btn btn-logout" id="disconnectButton" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> Disconnect
+            </button>
         </div>
-        <div id="game-over-screen">
-            <h2>Game Over!</h2>
-            <p id="final-score">Score: 0</p>
-            <p>Highest Level: <span id="highest-level">1</span></p>
-            <button id="restart-button">PLAY AGAIN</button>
+        
+        <div class="card game-section" id="gameSection">
+            <h2>Tic-Tac-Toe Game</h2>
+            <p class="status" id="gameStatus">Giliran: <span id="currentPlayer">X</span></p>
+            
+            <div class="game-container">
+                <div class="game-info">
+                    <h3>Informasi Game</h3>
+                    <p>Player 1 (X): <span id="playerX">Anda</span></p>
+                    <p>Player 2 (O): <span id="playerO">Komputer</span></p>
+                    
+                    <div class="score">
+                        <div>Menang (X): <span id="scoreX">0</span></div>
+                        <div>Menang (O): <span id="scoreO">0</span></div>
+                        <div>Seri: <span id="scoreDraw">0</span></div>
+                    </div>
+                    
+                    <button class="btn" id="resetGame" style="margin-top: 15px;">
+                        <i class="fas fa-redo"></i> Reset Game
+                    </button>
+                </div>
+                
+                <div class="game-board" id="gameBoard">
+                    <!-- Cells akan diisi oleh JavaScript -->
+                </div>
+            </div>
         </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Cara Menggunakan</h3>
+            <ol>
+                <li>Pastikan Anda telah menginstal wallet Solana (seperti Phantom) di browser Anda</li>
+                <li>Klik tombol "Connect Wallet" untuk menghubungkan wallet</li>
+                <li>Setelah terhubung, Anda dapat memainkan game Tic-Tac-Toe</li>
+                <li>Klik pada kotak untuk menempatkan simbol X, kemudian komputer akan merespons dengan O</li>
+                <li>Gunakan tombol "Reset Game" untuk memulai permainan baru</li>
+            </ol>
+        </div>
+        
+        <footer>
+            <p>Solana Wallet Login Demo &copy; 2023</p>
+        </footer>
     </div>
-    
-    <noscript>
-        <p>This game requires JavaScript to run. Please enable it in your browser.</p>
-    </noscript>
 
-    <script src="js/game.js"></script>
+    <script src="login.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
