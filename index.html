@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Wallet Login & Game</title>
+    <title>Solana Wallet Login & Games</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
@@ -25,7 +25,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             width: 100%;
             text-align: center;
         }
@@ -121,8 +121,21 @@
             background: linear-gradient(90deg, #ff416c, #ff4b2b);
         }
         
+        .btn-game {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            margin: 5px;
+        }
+        
         .game-section {
             display: none;
+        }
+        
+        .game-selection {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
         }
         
         .game-container {
@@ -139,7 +152,8 @@
             text-align: left;
         }
         
-        .game-board {
+        /* Tic-Tac-Toe Styles */
+        .tic-tac-toe-board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
@@ -170,6 +184,60 @@
         
         .cell.o {
             color: #fc00ff;
+        }
+        
+        /* Rock-Paper-Scissors Styles */
+        .rps-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .rps-choices {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .rps-choice {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .rps-choice:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .rps-choice.selected {
+            background: rgba(76, 209, 55, 0.3);
+            box-shadow: 0 0 20px rgba(76, 209, 55, 0.5);
+        }
+        
+        .rps-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .rps-player, .rps-computer {
+            text-align: center;
+        }
+        
+        .rps-icon {
+            font-size: 4rem;
+            margin: 10px 0;
         }
         
         .score {
@@ -226,13 +294,23 @@
             font-size: 0.9rem;
         }
         
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .game-container {
                 grid-template-columns: 1fr;
             }
             
             h1 {
                 font-size: 2rem;
+            }
+            
+            .rps-choices {
+                gap: 10px;
+            }
+            
+            .rps-choice {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
             }
         }
     </style>
@@ -241,18 +319,18 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-wallet"></i> Solana Wallet Login</h1>
-            <p class="subtitle">Login dengan wallet Solana dan mainkan game Tic-Tac-Toe</p>
+            <p class="subtitle">Login with your Solana wallet and play games</p>
         </header>
         
         <div class="card login-section" id="loginSection">
-            <h2>Login dengan Solana Wallet</h2>
-            <p>Pilih wallet untuk login ke aplikasi</p>
+            <h2>Login with Solana Wallet</h2>
+            <p>Select a wallet to login to the application</p>
             
             <div class="wallet-info" id="walletInfo">
-                <h3>Wallet Terhubung</h3>
-                <p>Alamat Wallet:</p>
+                <h3>Wallet Connected</h3>
+                <p>Wallet Address:</p>
                 <div class="wallet-address" id="walletAddress"></div>
-                <p>Saldo: <span id="walletBalance">0</span> SOL</p>
+                <p>Balance: <span id="walletBalance">0</span> SOL</p>
             </div>
             
             <button class="btn" id="connectButton">
@@ -264,40 +342,95 @@
         </div>
         
         <div class="card game-section" id="gameSection">
-            <h2>Tic-Tac-Toe Game</h2>
-            <p class="status" id="gameStatus">Giliran: <span id="currentPlayer">X</span></p>
+            <h2>Select a Game</h2>
             
-            <div class="game-container">
-                <div class="game-info">
-                    <h3>Informasi Game</h3>
-                    <p>Player 1 (X): <span id="playerX">Anda</span></p>
-                    <p>Player 2 (O): <span id="playerO">Komputer</span></p>
-                    
-                    <div class="score">
-                        <div>Menang (X): <span id="scoreX">0</span></div>
-                        <div>Menang (O): <span id="scoreO">0</span></div>
-                        <div>Seri: <span id="scoreDraw">0</span></div>
+            <div class="game-selection">
+                <button class="btn btn-game" id="ticTacToeBtn">
+                    <i class="fas fa-times"></i> Tic-Tac-Toe
+                </button>
+                <button class="btn btn-game" id="rpsBtn">
+                    <i class="fas fa-hand-rock"></i> Rock-Paper-Scissors
+                </button>
+            </div>
+            
+            <!-- Tic-Tac-Toe Game -->
+            <div class="game-content" id="ticTacToeGame">
+                <h3>Tic-Tac-Toe</h3>
+                <p class="status" id="gameStatus">Turn: <span id="currentPlayer">X</span></p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Player 1 (X): <span id="playerX">You</span></p>
+                        <p>Player 2 (O): <span id="playerO">Computer</span></p>
+                        
+                        <div class="score">
+                            <div>Wins (X): <span id="scoreX">0</span></div>
+                            <div>Wins (O): <span id="scoreO">0</span></div>
+                            <div>Draws: <span id="scoreDraw">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="resetTicTacToe" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> Reset Game
+                        </button>
                     </div>
                     
-                    <button class="btn" id="resetGame" style="margin-top: 15px;">
-                        <i class="fas fa-redo"></i> Reset Game
-                    </button>
+                    <div class="tic-tac-toe-board" id="ticTacToeBoard">
+                        <!-- Cells will be filled by JavaScript -->
+                    </div>
                 </div>
+            </div>
+            
+            <!-- Rock-Paper-Scissors Game -->
+            <div class="game-content" id="rpsGame" style="display: none;">
+                <h3>Rock-Paper-Scissors</h3>
+                <p class="status" id="rpsStatus">Make your choice!</p>
                 
-                <div class="game-board" id="gameBoard">
-                    <!-- Cells akan diisi oleh JavaScript -->
+                <div class="rps-container">
+                    <div class="rps-choices">
+                        <div class="rps-choice" data-choice="rock">
+                            <i class="fas fa-hand-rock"></i>
+                        </div>
+                        <div class="rps-choice" data-choice="paper">
+                            <i class="fas fa-hand-paper"></i>
+                        </div>
+                        <div class="rps-choice" data-choice="scissors">
+                            <i class="fas fa-hand-scissors"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="rps-results">
+                        <div class="rps-player">
+                            <h4>Your Choice</h4>
+                            <div class="rps-icon" id="playerChoice">-</div>
+                        </div>
+                        <div class="rps-computer">
+                            <h4>Computer's Choice</h4>
+                            <div class="rps-icon" id="computerChoice">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="score">
+                        <div>Wins: <span id="rpsWins">0</span></div>
+                        <div>Losses: <span id="rpsLosses">0</span></div>
+                        <div>Ties: <span id="rpsTies">0</span></div>
+                    </div>
+                    
+                    <button class="btn" id="resetRPS">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
                 </div>
             </div>
         </div>
         
         <div class="instructions">
-            <h3><i class="fas fa-info-circle"></i> Cara Menggunakan</h3>
+            <h3><i class="fas fa-info-circle"></i> How to Use</h3>
             <ol>
-                <li>Pastikan Anda telah menginstal wallet Solana (seperti Phantom) di browser Anda</li>
-                <li>Klik tombol "Connect Wallet" untuk menghubungkan wallet</li>
-                <li>Setelah terhubung, Anda dapat memainkan game Tic-Tac-Toe</li>
-                <li>Klik pada kotak untuk menempatkan simbol X, kemudian komputer akan merespons dengan O</li>
-                <li>Gunakan tombol "Reset Game" untuk memulai permainan baru</li>
+                <li>Make sure you have a Solana wallet (like Phantom) installed in your browser</li>
+                <li>Click the "Connect Wallet" button to connect your wallet</li>
+                <li>After connecting, select a game to play</li>
+                <li>Play Tic-Tac-Toe against the computer or test your luck with Rock-Paper-Scissors</li>
+                <li>Your game scores will be tracked during your session</li>
             </ol>
         </div>
         
