@@ -98,7 +98,7 @@
         let walletAddress = '';
         let wallet;
         let connection;
-        let game; // Variabel game dideklarasikan di sini
+        let game;
 
         // Konfigurasi Solana
         const SOLANA_NETWORK = 'https://api.devnet.solana.com';
@@ -146,7 +146,6 @@
                     hideLoading();
                     hideError();
                     
-                    // Inisialisasi game setelah wallet terhubung
                     initGame();
                 });
                 
@@ -158,13 +157,11 @@
                     document.getElementById('game-container').style.display = 'none';
                     hideLoading();
                     
-                    // Hentikan game jika sedang berjalan
                     if (game) {
                         game.destroy(true);
                     }
                 });
 
-                // Event listeners untuk tombol
                 connectButton.addEventListener('click', connectWallet);
                 disconnectButton.addEventListener('click', disconnectWallet);
 
@@ -174,7 +171,6 @@
             }
         }
 
-        // Connect wallet
         async function connectWallet() {
             try {
                 showLoading();
@@ -190,7 +186,6 @@
             }
         }
 
-        // Disconnect wallet
         async function disconnectWallet() {
             try {
                 await wallet.disconnect();
@@ -200,7 +195,6 @@
             }
         }
 
-        // Simpan point (simulasi - untuk production perlu smart contract)
         async function savePointToBlockchain() {
             if (!wallet.connected || !walletAddress) return false;
             
@@ -214,7 +208,6 @@
             }
         }
 
-        // Load point
         async function loadPointFromBlockchain() {
             if (!walletAddress) return 0;
             
@@ -231,7 +224,6 @@
             }
         }
 
-        // Inisialisasi game Phaser
         function initGame() {
             const config = {
                 type: Phaser.AUTO,
@@ -240,6 +232,13 @@
                     autoCenter: Phaser.Scale.CENTER_BOTH,
                     width: 400,
                     height: 600
+                },
+                // PERBAIKAN: Tambahkan konfigurasi canvas untuk optimasi
+                canvas: {
+                    willReadFrequently: true
+                },
+                canvasStyle: {
+                    willReadFrequently: true
                 },
                 backgroundColor: "#000033",
                 parent: 'game-container',
@@ -268,10 +267,8 @@
         function create() {
             gameScene = this;
 
-            // Background
             this.add.image(0, 0, "background").setOrigin(0).setDisplaySize(this.sys.game.config.width, this.sys.game.config.height);
 
-            // Sistem partikel
             particles = this.add.particles("sparkle");
             
             emitter = particles.createEmitter({
@@ -289,7 +286,6 @@
 
             const ballSize = this.sys.game.config.width / 6;
 
-            // Bola
             ball = this.add.sprite(
                 this.sys.game.config.width / 2,
                 this.sys.game.config.height / 2,
@@ -297,7 +293,6 @@
             ).setInteractive();
             ball.setDisplaySize(ballSize, ballSize);
 
-            // Bom
             const bombSize = this.sys.game.config.width / 8;
             bomb = this.add.sprite(
                 this.sys.game.config.width / 2,
@@ -308,14 +303,12 @@
             bomb.setVisible(false);
             bombVisible = false;
 
-            // Teks point
             pointText = this.add.text(10, 10, `Point: ${point}`, {
                 fontSize: "24px",
                 fill: "#fff",
                 fontStyle: "bold"
             });
 
-            // Event handlers
             ball.on("pointerdown", handleBallClick);
             bomb.on("pointerdown", handleBombClick);
 
@@ -376,16 +369,15 @@
 
         function update() {}
 
-        // Inisialisasi ketika halaman dimuat
         window.addEventListener('load', () => {
             initWallet();
         });
 
-        // Error handling global
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.error);
             showError('Terjadi kesalahan. Silakan refresh halaman.');
         });
     </script>
+    <!-- HAPUS BARIS INI: <script src="js/game.js"></script> -->
 </body>
 </html>
