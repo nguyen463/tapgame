@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="id">
+<head>
     <meta charset="UTF-8" />
-    <title>Tap Tap Game</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Tap-Tap Keren</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background: #000;
-      }
-      canvas {
-        display: block;
-        margin: auto;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        canvas {
+            display: block;
+        }
     </style>
-  </head>
-  <body>
-    <!-- ✅ game.js dipanggil setelah body -->
+</head>
+<body>
+    <div id="game-container"></div>
+    <noscript>
+        <p>Game ini membutuhkan JavaScript untuk berjalan. Mohon aktifkan di browser Anda.</p>
+    </noscript>
     <script src="js/game.js"></script>
-  </body>
+</body>
 </html>
