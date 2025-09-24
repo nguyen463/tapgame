@@ -20,27 +20,43 @@ const highestLevelDisplay = document.getElementById('highest-level');
 const startButton = document.getElementById('start-button');
 const restartButton = document.getElementById('restart-button');
 
+// Deteksi ukuran layar
+function getScreenSize() {
+    const isMobile = window.innerWidth <= 768;
+    const width = isMobile ? window.innerWidth : 800;
+    const height = isMobile ? window.innerHeight : 600;
+    return { width, height, isMobile };
+}
+
 // Konfigurasi game Phaser
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    parent: 'game-container',
-    backgroundColor: '#0f3460',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 0 },
-            debug: false
+function createGameConfig() {
+    const { width, height, isMobile } = getScreenSize();
+    
+    return {
+        type: Phaser.AUTO,
+        width: width,
+        height: height,
+        parent: 'game-container',
+        backgroundColor: '#0f3460',
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 },
+                debug: false
+            }
+        },
+        scale: {
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        scene: {
+            key: 'main',
+            preload: preload,
+            create: create,
+            update: update
         }
-    },
-    scene: {
-        key: 'main', // Tambahkan key untuk scene
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
+    };
+}
 
 // Fungsi preload assets
 function preload() {
@@ -53,8 +69,10 @@ function preload() {
 
 // Fungsi create - inisialisasi game objects
 function create() {
+    const { width, height, isMobile } = getScreenSize();
+    
     // Tambahkan background
-    this.add.image(400, 300, 'background').setDisplaySize(800, 600);
+    this.add.image(width / 2, height / 2, 'background').setDisplaySize(width, height);
     
     // Buat grup untuk target
     this.blueTargets = this.physics.add.group();
@@ -82,58 +100,73 @@ function create() {
         on: false
     });
     
-    // Event untuk menangani klik pada target
-    this.input.on('gameobjectdown', (pointer, gameObject) => {
+    // Event untuk menangani klik pada target (mobile friendly)
+    this.input.on('pointerdown', (pointer, gameObjects) => {
         if (!isGameRunning) return;
         
-        if (gameObject.texture.key === 'blueTarget') {
-            // Kena target biru - tambah poin dan combo
-            combo++;
-            maxCombo = Math.max(maxCombo, combo);
-            score += level; // Poin berdasarkan level
-            scoreDisplay.textContent = `Skor: ${score}`;
-            
-            // Efek partikel
-            this.blueEmitter.explode(10, gameObject.x, gameObject.y);
-            
-            // Hapus target dan buat yang baru
-            gameObject.destroy();
-            spawnBlueTarget(this);
-            
-            // Cek jika perlu naik level
-            if (score % 20 === 0) {
-                levelUp();
-            }
-        } 
-        else if (gameObject.texture.key === 'redTarget') {
-            // Kena target merah - reset combo dan kurangi poin
-            combo = 0;
-            score = Math.max(0, score - 5);
-            scoreDisplay.textContent = `Skor: ${score}`;
-            
-            // Efek partikel
-            this.redEmitter.explode(10, gameObject.x, gameObject.y);
-            
-            // Hapus target
-            gameObject.destroy();
+        if (gameObjects.length > 0) {
+            const gameObject = gameObjects[0];
+            handleTargetClick(this, gameObject);
         }
     });
     
+    // Juga tangani gameobjectdown untuk kompatibilitas
+    this.input.on('gameobjectdown', (pointer, gameObject) => {
+        if (!isGameRunning) return;
+        handleTargetClick(this, gameObject);
+    });
+    
     // Spawn target biru awal
-    for (let i = 0; i < 3; i++) {
+    const initialTargets = isMobile ? 2 : 3;
+    for (let i = 0; i < initialTargets; i++) {
         spawnBlueTarget(this);
     }
     
     // Timer untuk spawn target merah
     this.time.addEvent({
-        delay: 5000,
+        delay: isMobile ? 4000 : 5000, // Lebih cepat di mobile
         callback: () => {
-            if (isGameRunning && this.redTargets.getLength() < 2) {
+            if (isGameRunning && this.redTargets.getLength() < (isMobile ? 1 : 2)) {
                 spawnRedTarget(this);
             }
         },
         loop: true
     });
+}
+
+// Fungsi untuk menangani klik target
+function handleTargetClick(scene, gameObject) {
+    if (gameObject.texture.key === 'blueTarget') {
+        // Kena target biru - tambah poin dan combo
+        combo++;
+        maxCombo = Math.max(maxCombo, combo);
+        score += level; // Poin berdasarkan level
+        scoreDisplay.textContent = `Skor: ${score}`;
+        
+        // Efek partikel
+        scene.blueEmitter.explode(10, gameObject.x, gameObject.y);
+        
+        // Hapus target dan buat yang baru
+        gameObject.destroy();
+        spawnBlueTarget(scene);
+        
+        // Cek jika perlu naik level
+        if (score % 20 === 0) {
+            levelUp();
+        }
+    } 
+    else if (gameObject.texture.key === 'redTarget') {
+        // Kena target merah - reset combo dan kurangi poin
+        combo = 0;
+        score = Math.max(0, score - 5);
+        scoreDisplay.textContent = `Skor: ${score}`;
+        
+        // Efek partikel
+        scene.redEmitter.explode(10, gameObject.x, gameObject.y);
+        
+        // Hapus target
+        gameObject.destroy();
+    }
 }
 
 // Fungsi update - logika game loop
@@ -150,17 +183,23 @@ function update() {
 
 // Fungsi untuk spawn target biru
 function spawnBlueTarget(scene) {
-    const x = Phaser.Math.Between(50, 750);
-    const y = Phaser.Math.Between(50, 550);
+    const { width, height, isMobile } = getScreenSize();
+    const margin = isMobile ? 40 : 50;
+    
+    const x = Phaser.Math.Between(margin, width - margin);
+    const y = Phaser.Math.Between(margin, height - margin);
     
     const target = scene.blueTargets.create(x, y, 'blueTarget');
     target.setInteractive();
-    target.setScale(0.8);
+    
+    // Sesuaikan ukuran target untuk mobile
+    const scale = isMobile ? 0.6 : 0.8;
+    target.setScale(scale);
     
     // Animasi muncul
     scene.tweens.add({
         targets: target,
-        scale: 1,
+        scale: scale,
         duration: 300,
         ease: 'Back.easeOut'
     });
@@ -168,17 +207,23 @@ function spawnBlueTarget(scene) {
 
 // Fungsi untuk spawn target merah
 function spawnRedTarget(scene) {
-    const x = Phaser.Math.Between(50, 750);
-    const y = Phaser.Math.Between(50, 550);
+    const { width, height, isMobile } = getScreenSize();
+    const margin = isMobile ? 40 : 50;
+    
+    const x = Phaser.Math.Between(margin, width - margin);
+    const y = Phaser.Math.Between(margin, height - margin);
     
     const target = scene.redTargets.create(x, y, 'redTarget');
     target.setInteractive();
-    target.setScale(0.8);
+    
+    // Sesuaikan ukuran target untuk mobile
+    const scale = isMobile ? 0.6 : 0.8;
+    target.setScale(scale);
     
     // Animasi berdenyut
     scene.tweens.add({
         targets: target,
-        scale: 0.9,
+        scale: scale * 0.9,
         duration: 500,
         yoyo: true,
         repeat: -1
@@ -216,11 +261,11 @@ function startGame() {
     
     // Inisialisasi game Phaser jika belum ada
     if (!game) {
-        game = new Phaser.Game(config);
+        game = new Phaser.Game(createGameConfig());
     } else {
-        // Restart scene dengan cara yang benar
-        game.scene.stop('main');
-        game.scene.start('main');
+        // Hancurkan game lama dan buat yang baru dengan ukuran yang benar
+        game.destroy(true);
+        game = new Phaser.Game(createGameConfig());
     }
     
     // Mulai timer
@@ -250,8 +295,30 @@ function endGame() {
 startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', startGame);
 
+// Handle resize window
+window.addEventListener('resize', () => {
+    if (game && isGameRunning) {
+        // Restart game dengan ukuran baru
+        game.scene.stop('main');
+        game.scene.start('main');
+    }
+});
+
 // Inisialisasi saat halaman dimuat
 window.addEventListener('load', () => {
     // Tidak langsung memulai game, tunggu klik pengguna
     console.log('Game Tap-Tap siap dimainkan!');
+    
+    // Prevent default touch behaviors
+    document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', function(e) {
+        if (e.touches.length > 0) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 });
