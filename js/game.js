@@ -1,10 +1,15 @@
 let score = 0;
 let scoreText;
+let ball;
 
 const config = {
   type: Phaser.AUTO,
-  width: 400,
-  height: 600,
+  scale: {
+    mode: Phaser.Scale.FIT,          // fit ke layar HP
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 400,
+    height: 600
+  },
   backgroundColor: "#87CEEB",
   scene: {
     preload: preload,
@@ -16,12 +21,16 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-  // Ganti ke asset kamu sendiri
+  // Pastikan path benar, kalau di folder assets sama level dengan index.html:
   this.load.image("ball", "../assets/ball.png");
 }
 
 function create() {
-  const ball = this.add.sprite(200, 300, "ball").setInteractive();
+  ball = this.add.sprite(config.width / 2, config.height / 2, "ball").setInteractive();
+
+  // Sesuaikan ukuran biar pas (misal 1/6 dari lebar layar)
+  const targetSize = config.width / 6;
+  ball.setDisplaySize(targetSize, targetSize);
 
   // Event tap
   ball.on("pointerdown", () => {
@@ -29,8 +38,8 @@ function create() {
     scoreText.setText("Score: " + score);
 
     // Pindah posisi random
-    ball.x = Phaser.Math.Between(50, 350);
-    ball.y = Phaser.Math.Between(50, 550);
+    ball.x = Phaser.Math.Between(targetSize, config.width - targetSize);
+    ball.y = Phaser.Math.Between(targetSize, config.height - targetSize);
   });
 
   // Teks skor
