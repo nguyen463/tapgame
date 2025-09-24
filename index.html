@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -23,12 +24,15 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
             overflow: hidden;
+            touch-action: manipulation;
         }
         
         #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
+            max-width: 100%;
+            max-height: 100%;
             box-shadow: none;
             border-radius: 0;
             overflow: hidden;
@@ -47,27 +51,27 @@
         #score-display, #timer-display, #level-display {
             position: absolute;
             background: rgba(0, 0, 0, 0.6);
-            padding: 10px 20px;
+            padding: 8px 15px;
             border-radius: 5px;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
         }
         
         #score-display {
-            top: 20px;
-            left: 20px;
+            top: 10px;
+            left: 10px;
             color: #4cd137;
         }
         
         #timer-display {
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             color: #e84118;
         }
         
         #level-display {
-            top: 20px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
             color: #00a8ff;
@@ -86,7 +90,7 @@
             background: rgba(0, 0, 0, 0.85);
             z-index: 20;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
         }
         
         #game-over-screen {
@@ -94,77 +98,83 @@
         }
         
         h1 {
-            font-size: 48px;
+            font-size: 32px;
             margin-bottom: 10px;
             text-shadow: 0 0 10px #00f7ff;
             color: #00f7ff;
         }
         
         h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 28px;
+            margin-bottom: 15px;
             color: #ff9ff3;
         }
         
         button {
             background: linear-gradient(135deg, #00f7ff 0%, #008cff 100%);
             border: none;
-            padding: 15px 40px;
-            font-size: 20px;
+            padding: 12px 30px;
+            font-size: 18px;
             color: white;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 30px;
+            margin-top: 20px;
             pointer-events: auto;
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 5px 15px rgba(0, 247, 255, 0.4);
             font-weight: bold;
+            min-height: 50px;
+            min-width: 200px;
         }
         
-        button:hover {
-            transform: translateY(-3px);
+        button:hover, button:active {
+            transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 247, 255, 0.6);
         }
         
         p {
-            font-size: 18px;
-            max-width: 80%;
+            font-size: 16px;
+            max-width: 90%;
             text-align: center;
-            line-height: 1.5;
-            margin-bottom: 15px;
+            line-height: 1.4;
+            margin-bottom: 10px;
         }
         
         canvas {
             display: block;
+            width: 100% !important;
+            height: 100% !important;
         }
         
         .instructions {
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
             text-align: left;
-            max-width: 80%;
+            max-width: 90%;
+            font-size: 14px;
         }
         
         .instructions h3 {
             color: #00f7ff;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
+            font-size: 18px;
         }
         
         .instructions ul {
-            padding-left: 20px;
+            padding-left: 15px;
         }
         
         .instructions li {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         #final-score {
-            font-size: 60px;
+            font-size: 40px;
             color: #4cd137;
-            margin: 20px 0;
+            margin: 15px 0;
             text-shadow: 0 0 10px rgba(76, 209, 55, 0.5);
         }
         
@@ -174,14 +184,39 @@
             pointer-events: none;
             z-index: 5;
         }
-        
-        @media (max-width: 600px) {
-            #game-container {
-                height: 100vh;
+
+        /* Landscape mode adjustments */
+        @media (orientation: landscape) {
+            #score-display, #timer-display, #level-display {
+                font-size: 14px;
+                padding: 6px 12px;
             }
             
             h1 {
-                font-size: 30px;
+                font-size: 28px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            button {
+                padding: 10px 25px;
+                font-size: 16px;
+                min-height: 45px;
+                min-width: 180px;
+            }
+            
+            .instructions {
+                max-height: 40vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 28px;
             }
             
             h2 {
@@ -189,22 +224,19 @@
             }
             
             #score-display, #timer-display, #level-display {
-                font-size: 14px;
+                font-size: 12px;
                 padding: 5px 10px;
             }
             
             button {
-                padding: 12px 30px;
-                font-size: 18px;
+                padding: 10px 20px;
+                font-size: 16px;
+                min-height: 45px;
+                min-width: 160px;
             }
             
             p {
-                font-size: 16px;
-            }
-            
-            .instructions {
-                padding: 10px;
-                margin-top: 10px;
+                font-size: 14px;
             }
         }
     </style>
