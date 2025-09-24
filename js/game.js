@@ -1,8 +1,10 @@
 let point = 0;
 let pointText;
 let ball;
+let bomb;
 let particles;
 let emitter;
+let bombVisible = false;
 
 const config = {
     type: Phaser.AUTO,
@@ -26,6 +28,7 @@ const game = new Phaser.Game(config);
 function preload() {
     this.load.image("background", "https://labs.phaser.io/assets/skies/space3.png");
     this.load.image("ball", "../assets/ball.png");
+    this.load.image("bomb", "https://labs.phaser.io/assets/sprites/bomb.png");
     
     // Memuat gambar partikel yang lebih keren untuk efek kembang api
     this.load.image("sparkle", "https://labs.phaser.io/assets/particles/blue.png");
@@ -74,6 +77,16 @@ function create() {
     ).setInteractive();
     ball.setDisplaySize(ballSize, ballSize);
 
+    // Buat bom yang bisa diklik
+    const bombSize = this.sys.game.config.width / 8;
+    bomb = this.add.sprite(
+        this.sys.game.config.width / 2,
+        this.sys.game.config.height / 2,
+        "bomb"
+    ).setInteractive();
+    bomb.setDisplaySize(bombSize, bombSize);
+    bomb.setVisible(false); // Sembunyikan bom awal
+
     // Tambahkan teks point
     pointText = this.add.text(10, 10, "Point: 0", {
         fontSize: "24px",
@@ -117,6 +130,63 @@ function create() {
             });
         }
     });
+
+    // Event saat bom di-tap atau di-klik
+    bomb.on("pointerdown", () => {
+        // Kurangi 5 point
+        point = Math.max(0, point - 5); // Pastikan point tidak negatif
+        pointText.setText(`Point: ${point}`);
+        
+        // Efek partikel merah untuk bom
+        const bombEmitter = particles.createEmitter({
+            speed: { min: 50, max: 150 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 0.5, end: 0 },
+            alpha: { start: 1, end: 0 },
+            tint: 0xff0000, // Warna merah untuk efek bom
+            blendMode: 'ADD',
+            lifespan: 1000,
+            quantity: 20,
+            on: false
+        });
+        
+        bombEmitter.explode(20, bomb.x, bomb.y);
+        
+        // Sembunyikan bom
+        bomb.setVisible(false);
+        bombVisible = false;
+        
+        // Jadwalkan munculnya bom berikutnya dalam 3-8 detik
+        this.time.delayedCall(Phaser.Math.Between(3000, 8000), showBomb);
+    });
+
+    // Jadwalkan munculnya bom pertama dalam 5 detik
+    this.time.delayedCall(5000, showBomb);
+}
+
+// Fungsi untuk menampilkan bom di posisi random
+function showBomb() {
+    if (!bombVisible) {
+        const bombSize = bomb.displayWidth;
+        const newX = Phaser.Math.Between(bombSize, this.sys.game.config.width - bombSize);
+        const newY = Phaser.Math.Between(bombSize, this.sys.game.config.height - bombSize);
+        
+        bomb.setPosition(newX, newY);
+        bomb.setVisible(true);
+        bombVisible = true;
+        
+        // Animasi kedip-kedip pada bom untuk peringatan
+        this.tweens.add({
+            targets: bomb,
+            alpha: 0.5,
+            duration: 300,
+            yoyo: true,
+            repeat: 3,
+            onComplete: () => {
+                bomb.setAlpha(1);
+            }
+        });
+    }
 }
 
 function update() {}
