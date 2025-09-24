@@ -27,8 +27,8 @@ function preload() {
     this.load.image("background", "https://labs.phaser.io/assets/skies/space3.png");
     this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png");
     
-    // Memuat gambar partikel yang lebih keren untuk efek kembang api
-    this.load.image("sparkle", "https://labs.phaser.io/assets/particles/flare.png"); // Gambar baru
+    // Memuat gambar partikel yang baru dan berfungsi
+    this.load.image("sparkle", "https://labs.phaser.io/assets/particles/blue.png"); 
 }
 
 function create() {
@@ -36,7 +36,7 @@ function create() {
     this.add.image(0, 0, "background").setOrigin(0).setDisplaySize(this.sys.game.config.width, this.sys.game.config.height);
 
     // Buat sistem partikel utama untuk ledakan
-    particles = this.add.particles("sparkle"); // Ganti "pixel" jadi "sparkle"
+    particles = this.add.particles("sparkle");
     
     emitter = particles.createEmitter({
         speed: { min: 200, max: 400 },
@@ -51,7 +51,6 @@ function create() {
         blendMode: 'ADD',
     });
     
-    // Buat emitter sekunder untuk efek percikan
     const sparkleEmitter = particles.createEmitter({
         speed: { min: 50, max: 100 },
         scale: { start: 0.5, end: 0 },
@@ -64,10 +63,8 @@ function create() {
         follow: emitter
     });
 
-    // Sesuaikan ukuran bola
     const ballSize = this.sys.game.config.width / 6;
 
-    // Buat bola yang bisa diklik
     ball = this.add.sprite(
         this.sys.game.config.width / 2,
         this.sys.game.config.height / 2,
@@ -75,19 +72,16 @@ function create() {
     ).setInteractive();
     ball.setDisplaySize(ballSize, ballSize);
 
-    // Tambahkan teks skor
     scoreText = this.add.text(10, 10, "Score: 0", {
         fontSize: "24px",
         fill: "#fff",
         fontStyle: "bold"
     });
 
-    // Event saat bola di-tap atau di-klik
     ball.on("pointerdown", () => {
         score++;
         scoreText.setText(`Score: ${score}`);
 
-        // Pindahkan bola ke posisi acak dengan animasi
         const newX = Phaser.Math.Between(ballSize, this.sys.game.config.width - ballSize);
         const newY = Phaser.Math.Between(ballSize, this.sys.game.config.height - ballSize);
 
@@ -99,7 +93,6 @@ function create() {
             ease: "Power1",
         });
 
-        // Cek apakah skor mencapai kelipatan 100
         if (score > 0 && score % 10 === 0) {
             emitter.setPosition(ball.x, ball.y);
             emitter.explode(150);
