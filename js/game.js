@@ -25,7 +25,7 @@ const game = new Phaser.Game(config);
 
 function preload() {
     this.load.image("background", "https://labs.phaser.io/assets/skies/space3.png");
-    this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png");
+    this.load.image("ball", "../assets/ball.png");
     
     // Memuat gambar partikel yang lebih keren untuk efek kembang api
     this.load.image("sparkle", "https://labs.phaser.io/assets/particles/blue.png");
