@@ -1,4 +1,4 @@
-// game.js - Logika game Tic-Tac-Toe
+// game.js - Game logic
 
 class TicTacToeGame {
     constructor() {
@@ -13,40 +13,37 @@ class TicTacToeGame {
         };
         
         // Element references
-        this.gameBoard = document.getElementById('gameBoard');
+        this.gameBoard = document.getElementById('ticTacToeBoard');
         this.gameStatus = document.getElementById('gameStatus');
         this.currentPlayerSpan = document.getElementById('currentPlayer');
         this.scoreX = document.getElementById('scoreX');
         this.scoreO = document.getElementById('scoreO');
         this.scoreDraw = document.getElementById('scoreDraw');
-        this.resetButton = document.getElementById('resetGame');
+        this.resetButton = document.getElementById('resetTicTacToe');
         this.playerX = document.getElementById('playerX');
-        this.playerO = document.getElementById('playerO');
         
         this.winningConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Baris
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Kolom
-            [0, 4, 8], [2, 4, 6]             // Diagonal
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
         ];
-        
-        this.init();
     }
     
     init() {
-        // Setup nama pemain berdasarkan wallet
+        // Setup player name based on wallet
         if (window.walletLogin && window.walletLogin.getConnectionStatus()) {
             const publicKey = window.walletLogin.getPublicKey();
             const shortAddress = publicKey.substring(0, 6) + '...' + publicKey.substring(publicKey.length - 4);
             this.playerX.textContent = shortAddress;
         }
         
-        // Buat papan game
+        // Create game board
         this.createBoard();
         
-        // Event listener untuk tombol reset
+        // Event listener for reset button
         this.resetButton.addEventListener('click', () => this.resetGame());
         
-        // Update skor
+        // Update score
         this.updateScoreboard();
     }
     
@@ -65,23 +62,23 @@ class TicTacToeGame {
     }
     
     handleCellClick(index) {
-        // Cek apakah game masih aktif dan cell kosong
+        // Check if game is active and cell is empty
         if (!this.gameActive || this.board[index] !== '') {
             return;
         }
         
-        // Hanya biarkan player X (manusia) melakukan gerakan
+        // Only allow player X (human) to make moves
         if (this.currentPlayer !== 'X') {
             return;
         }
         
-        // Lakukan gerakan
+        // Make move
         this.makeMove(index, this.currentPlayer);
         
-        // Cek status game setelah gerakan manusia
+        // Check game status after human move
         this.checkGameStatus();
         
-        // Jika game masih berlangsung, biarkan komputer (O) bergerak
+        // If game is still active, let computer (O) move
         if (this.gameActive && this.currentPlayer === 'O') {
             setTimeout(() => this.computerMove(), 500);
         }
@@ -91,7 +88,7 @@ class TicTacToeGame {
         this.board[index] = player;
         this.updateBoard();
         
-        // Ganti pemain
+        // Switch players
         this.currentPlayer = player === 'X' ? 'O' : 'X';
         this.currentPlayerSpan.textContent = this.currentPlayer;
     }
@@ -99,15 +96,15 @@ class TicTacToeGame {
     computerMove() {
         if (!this.gameActive) return;
         
-        // AI sederhana: coba menang, blokir, atau gerakan acak
-        let moveIndex = this.findWinningMove('O'); // Coba menang
+        // Simple AI: try to win, block, or make random move
+        let moveIndex = this.findWinningMove('O'); // Try to win
         
         if (moveIndex === -1) {
-            moveIndex = this.findWinningMove('X'); // Blokir pemain
+            moveIndex = this.findWinningMove('X'); // Block player
         }
         
         if (moveIndex === -1) {
-            moveIndex = this.findRandomMove(); // Gerakan acak
+            moveIndex = this.findRandomMove(); // Random move
         }
         
         if (moveIndex !== -1) {
@@ -121,19 +118,19 @@ class TicTacToeGame {
             const [a, b, c] = condition;
             const board = this.board;
             
-            // Jika dua cell sudah diisi player dan satu kosong
+            // If two cells are filled by player and one is empty
             if ((board[a] === player && board[b] === player && board[c] === '') ||
                 (board[a] === player && board[c] === player && board[b] === '') ||
                 (board[b] === player && board[c] === player && board[a] === '')) {
                 
-                // Kembalikan index cell yang kosong
+                // Return the index of the empty cell
                 if (board[a] === '') return a;
                 if (board[b] === '') return b;
                 if (board[c] === '') return c;
             }
         }
         
-        return -1; // Tidak ada gerakan menang
+        return -1; // No winning move found
     }
     
     findRandomMove() {
@@ -151,7 +148,7 @@ class TicTacToeGame {
         let roundWon = false;
         let winner = null;
         
-        // Cek kondisi menang
+        // Check win conditions
         for (let condition of this.winningConditions) {
             const [a, b, c] = condition;
             
@@ -170,24 +167,24 @@ class TicTacToeGame {
             this.scores[winner]++;
             this.updateScoreboard();
             
-            this.gameStatus.innerHTML = `Pemenang: <span class="winner">Player ${winner}</span>`;
+            this.gameStatus.innerHTML = `Winner: <span class="winner">Player ${winner}</span>`;
             this.highlightWinningCells(winner);
             return;
         }
         
-        // Cek seri
+        // Check for draw
         if (!this.board.includes('')) {
             this.gameActive = false;
             this.gameState = 'draw';
             this.scores.draw++;
             this.updateScoreboard();
             
-            this.gameStatus.innerHTML = `<span class="winner">Permainan Seri!</span>`;
+            this.gameStatus.innerHTML = `<span class="winner">Game Draw!</span>`;
             return;
         }
         
-        // Game masih berlangsung
-        this.gameStatus.innerHTML = `Giliran: <span id="currentPlayer">${this.currentPlayer}</span>`;
+        // Game still ongoing
+        this.gameStatus.innerHTML = `Turn: <span id="currentPlayer">${this.currentPlayer}</span>`;
     }
     
     highlightWinningCells(winner) {
@@ -198,7 +195,7 @@ class TicTacToeGame {
                 this.board[a] === this.board[b] && 
                 this.board[a] === this.board[c]) {
                 
-                // Highlight sel-sel pemenang
+                // Highlight winning cells
                 const cells = this.gameBoard.children;
                 cells[a].style.background = 'rgba(76, 209, 55, 0.3)';
                 cells[b].style.background = 'rgba(76, 209, 55, 0.3)';
@@ -236,13 +233,179 @@ class TicTacToeGame {
         this.gameState = 'ongoing';
         
         this.currentPlayerSpan.textContent = this.currentPlayer;
-        this.gameStatus.innerHTML = `Giliran: <span id="currentPlayer">${this.currentPlayer}</span>`;
+        this.gameStatus.innerHTML = `Turn: <span id="currentPlayer">${this.currentPlayer}</span>`;
         
         this.createBoard();
     }
 }
 
-// Inisialisasi game saat halaman dimuat
+class RockPaperScissorsGame {
+    constructor() {
+        this.choices = ['rock', 'paper', 'scissors'];
+        this.playerChoice = null;
+        this.computerChoice = null;
+        this.result = null;
+        this.scores = {
+            wins: 0,
+            losses: 0,
+            ties: 0
+        };
+        
+        // Element references
+        this.rpsStatus = document.getElementById('rpsStatus');
+        this.playerChoiceIcon = document.getElementById('playerChoice');
+        this.computerChoiceIcon = document.getElementById('computerChoice');
+        this.rpsWins = document.getElementById('rpsWins');
+        this.rpsLosses = document.getElementById('rpsLosses');
+        this.rpsTies = document.getElementById('rpsTies');
+        this.resetButton = document.getElementById('resetRPS');
+        this.choiceElements = document.querySelectorAll('.rps-choice');
+    }
+    
+    init() {
+        // Setup event listeners
+        this.choiceElements.forEach(choice => {
+            choice.addEventListener('click', (e) => {
+                if (this.playerChoice) return; // Prevent changing choice after selection
+                
+                this.playerChoice = e.currentTarget.getAttribute('data-choice');
+                this.playGame();
+            });
+        });
+        
+        this.resetButton.addEventListener('click', () => this.resetGame());
+        
+        this.updateScoreboard();
+    }
+    
+    playGame() {
+        // Highlight player's choice
+        this.choiceElements.forEach(choice => {
+            choice.classList.remove('selected');
+            if (choice.getAttribute('data-choice') === this.playerChoice) {
+                choice.classList.add('selected');
+            }
+        });
+        
+        // Computer makes random choice
+        this.computerChoice = this.choices[Math.floor(Math.random() * this.choices.length)];
+        
+        // Determine winner
+        this.determineWinner();
+        
+        // Update UI
+        this.updateChoices();
+        this.updateStatus();
+        this.updateScoreboard();
+    }
+    
+    determineWinner() {
+        if (this.playerChoice === this.computerChoice) {
+            this.result = 'tie';
+            this.scores.ties++;
+        } else if (
+            (this.playerChoice === 'rock' && this.computerChoice === 'scissors') ||
+            (this.playerChoice === 'paper' && this.computerChoice === 'rock') ||
+            (this.playerChoice === 'scissors' && this.computerChoice === 'paper')
+        ) {
+            this.result = 'win';
+            this.scores.wins++;
+        } else {
+            this.result = 'lose';
+            this.scores.losses++;
+        }
+    }
+    
+    updateChoices() {
+        // Update player choice icon
+        switch (this.playerChoice) {
+            case 'rock':
+                this.playerChoiceIcon.innerHTML = '<i class="fas fa-hand-rock"></i>';
+                break;
+            case 'paper':
+                this.playerChoiceIcon.innerHTML = '<i class="fas fa-hand-paper"></i>';
+                break;
+            case 'scissors':
+                this.playerChoiceIcon.innerHTML = '<i class="fas fa-hand-scissors"></i>';
+                break;
+        }
+        
+        // Update computer choice icon
+        switch (this.computerChoice) {
+            case 'rock':
+                this.computerChoiceIcon.innerHTML = '<i class="fas fa-hand-rock"></i>';
+                break;
+            case 'paper':
+                this.computerChoiceIcon.innerHTML = '<i class="fas fa-hand-paper"></i>';
+                break;
+            case 'scissors':
+                this.computerChoiceIcon.innerHTML = '<i class="fas fa-hand-scissors"></i>';
+                break;
+        }
+    }
+    
+    updateStatus() {
+        switch (this.result) {
+            case 'win':
+                this.rpsStatus.innerHTML = `<span class="winner">You Win!</span>`;
+                break;
+            case 'lose':
+                this.rpsStatus.innerHTML = `<span style="color: #ff4b2b;">You Lose!</span>`;
+                break;
+            case 'tie':
+                this.rpsStatus.innerHTML = `<span style="color: #ffcc00;">It's a Tie!</span>`;
+                break;
+        }
+    }
+    
+    updateScoreboard() {
+        this.rpsWins.textContent = this.scores.wins;
+        this.rpsLosses.textContent = this.scores.losses;
+        this.rpsTies.textContent = this.scores.ties;
+    }
+    
+    resetGame() {
+        this.playerChoice = null;
+        this.computerChoice = null;
+        this.result = null;
+        
+        // Reset UI
+        this.rpsStatus.textContent = 'Make your choice!';
+        this.playerChoiceIcon.textContent = '-';
+        this.computerChoiceIcon.textContent = '-';
+        
+        // Remove selection highlights
+        this.choiceElements.forEach(choice => {
+            choice.classList.remove('selected');
+        });
+    }
+}
+
+// Game selection logic
 document.addEventListener('DOMContentLoaded', () => {
-    window.game = new TicTacToeGame();
+    // Initialize games
+    window.ticTacToeGame = new TicTacToeGame();
+    window.rpsGame = new RockPaperScissorsGame();
+    
+    // Game selection buttons
+    const ticTacToeBtn = document.getElementById('ticTacToeBtn');
+    const rpsBtn = document.getElementById('rpsBtn');
+    const ticTacToeGameElement = document.getElementById('ticTacToeGame');
+    const rpsGameElement = document.getElementById('rpsGame');
+    
+    ticTacToeBtn.addEventListener('click', () => {
+        ticTacToeGameElement.style.display = 'block';
+        rpsGameElement.style.display = 'none';
+        
+        // Reset RPS game when switching
+        rpsGame.resetGame();
+    });
+    
+    rpsBtn.addEventListener('click', () => {
+        ticTacToeGameElement.style.display = 'none';
+        rpsGameElement.style.display = 'block';
+        
+        // Reset Tic-Tac-Toe game when switching
+        ticTacToeGame.resetGame();
+    });
 });
