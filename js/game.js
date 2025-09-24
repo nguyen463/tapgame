@@ -31,7 +31,7 @@ function preload() {
     this.load.image("ball", "../assets/ball.png");
     this.load.image("bomb", "../assets/bomb.png");
     this.load.image("sparkle", "https://labs.phaser.io/assets/particles/red.png");
-    this.load.image("explosion", "../assets/blue.png"); // Gambar ledakan
+    this.load.image("explosion", "https://labs.phaser.io/assets/sprites/explosion.png"); // Gambar ledakan
 }
 
 function create() {
