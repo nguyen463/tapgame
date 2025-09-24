@@ -28,10 +28,9 @@ const game = new Phaser.Game(config);
 
 function preload() {
     this.load.image("background", "https://labs.phaser.io/assets/skies/space3.png");
-    this.load.image("ball", "../assets/ball.png");
+    this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png");
     this.load.image("bomb", "../assets/bomb.png");
-    this.load.image("sparkle", "https://labs.phaser.io/assets/particles/red.png");
-    this.load.image("explosion", "https://labs.phaser.io/assets/sprites/explosion.png"); // Gambar ledakan
+    this.load.image("sparkle", "https://labs.phaser.io/assets/sprites/explosion.png");
 }
 
 function create() {
@@ -65,19 +64,6 @@ function create() {
         blendMode: 'ADD',
         lifespan: 800,
         quantity: 5,
-        on: false
-    });
-
-    // Emitter khusus untuk ledakan bom
-    const explosionEmitter = particles.createEmitter({
-        frame: 'explosion', // Gunakan gambar ledakan
-        speed: { min: 100, max: 200 },
-        angle: { min: 0, max: 360 },
-        scale: { start: 0.3, end: 0 },
-        alpha: { start: 1, end: 0 },
-        blendMode: 'ADD',
-        lifespan: 1000,
-        quantity: 15,
         on: false
     });
 
@@ -149,10 +135,7 @@ function create() {
         point = Math.max(0, point - 5);
         pointText.setText(`Point: ${point}`);
         
-        // Efek ledakan besar menggunakan gambar ledakan.png
-        explosionEmitter.explode(15, bomb.x, bomb.y);
-        
-        // Efek partikel merah tambahan untuk bom
+        // Efek partikel merah untuk bom
         const bombEmitter = particles.createEmitter({
             speed: { min: 50, max: 150 },
             angle: { min: 0, max: 360 },
