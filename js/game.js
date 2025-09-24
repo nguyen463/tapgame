@@ -21,11 +21,12 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png); // ganti ke gambar kamu
+  // ✅ Kutip sudah benar + key konsisten "monster"
+  this.load.image("monster", "https://labs.phaser.io/assets/sprites/mushroom2.png");
 }
 
 function create() {
-  // Tambah sprite
+  // ✅ Key sama: "monster"
   monster = this.add.sprite(config.width / 2, config.height / 2, "monster").setInteractive();
 
   // Atur ukuran kecil biar pas di mobile
