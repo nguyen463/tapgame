@@ -21,7 +21,7 @@ const config = {
 const game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image("ball", "https://labs.phaser.io/assets/sprites/mushroom2.png");
+  this.load.image("ball", "../assets/ball.png");
 }
 
 function create() {
