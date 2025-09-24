@@ -1,4 +1,4 @@
-// login.js - Menangani koneksi ke Solana Wallet
+// login.js - Handle connection to Solana Wallet
 
 class SolanaWalletLogin {
     constructor() {
@@ -19,23 +19,23 @@ class SolanaWalletLogin {
     }
     
     init() {
-        // Cek apakah Phantom wallet terinstall
+        // Check if Phantom wallet is installed
         if (window.solana && window.solana.isPhantom) {
             this.provider = window.solana;
             this.setupEventListeners();
         } else {
             this.connectButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Install Phantom Wallet';
             this.connectButton.disabled = true;
-            alert('Silakan install Phantom Wallet terlebih dahulu!');
+            alert('Please install Phantom Wallet first!');
         }
         
-        // Setup event listeners untuk tombol
+        // Setup event listeners for buttons
         this.connectButton.addEventListener('click', () => this.connectWallet());
         this.disconnectButton.addEventListener('click', () => this.disconnectWallet());
     }
     
     setupEventListeners() {
-        // Event listener untuk perubahan koneksi wallet
+        // Event listener for wallet connection changes
         this.provider.on('connect', () => {
             console.log('Wallet connected!');
             this.handleConnected();
@@ -46,7 +46,7 @@ class SolanaWalletLogin {
             this.handleDisconnected();
         });
         
-        // Jika wallet sudah terhubung sebelumnya
+        // If wallet is already connected
         if (this.provider.isConnected) {
             this.handleConnected();
         }
@@ -54,13 +54,13 @@ class SolanaWalletLogin {
     
     async connectWallet() {
         try {
-            // Meminta koneksi ke wallet
+            // Request connection to wallet
             const response = await this.provider.connect();
             this.publicKey = response.publicKey.toString();
             console.log('Connected with public key:', this.publicKey);
         } catch (err) {
             console.error('Error connecting wallet:', err);
-            alert('Gagal menghubungkan wallet. Silakan coba lagi.');
+            alert('Failed to connect wallet. Please try again.');
         }
     }
     
@@ -74,15 +74,18 @@ class SolanaWalletLogin {
         this.walletInfo.style.display = 'block';
         this.walletAddress.textContent = this.publicKey;
         
-        // Tampilkan section game
+        // Show game section
         this.gameSection.style.display = 'block';
         
-        // Dapatkan saldo wallet
+        // Get wallet balance
         await this.getWalletBalance();
         
-        // Inisialisasi game setelah wallet terhubung
-        if (typeof game !== 'undefined') {
-            game.init();
+        // Initialize games after wallet is connected
+        if (typeof ticTacToeGame !== 'undefined') {
+            ticTacToeGame.init();
+        }
+        if (typeof rpsGame !== 'undefined') {
+            rpsGame.init();
         }
     }
     
@@ -96,9 +99,12 @@ class SolanaWalletLogin {
         this.walletInfo.style.display = 'none';
         this.gameSection.style.display = 'none';
         
-        // Reset game state
-        if (typeof game !== 'undefined') {
-            game.resetGame();
+        // Reset game states
+        if (typeof ticTacToeGame !== 'undefined') {
+            ticTacToeGame.resetGame();
+        }
+        if (typeof rpsGame !== 'undefined') {
+            rpsGame.resetGame();
         }
     }
     
@@ -112,13 +118,13 @@ class SolanaWalletLogin {
     
     async getWalletBalance() {
         try {
-            // Buat koneksi ke cluster Solana (gunakan devnet untuk testing)
+            // Create connection to Solana cluster (use devnet for testing)
             this.connection = new solanaWeb3.Connection(
                 solanaWeb3.clusterApiUrl('devnet'),
                 'confirmed'
             );
             
-            // Dapatkan saldo
+            // Get balance
             const publicKey = new solanaWeb3.PublicKey(this.publicKey);
             const balance = await this.connection.getBalance(publicKey);
             const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
@@ -130,18 +136,18 @@ class SolanaWalletLogin {
         }
     }
     
-    // Method untuk mendapatkan public key (digunakan oleh game.js)
+    // Method to get public key (used by game.js)
     getPublicKey() {
         return this.publicKey;
     }
     
-    // Method untuk mengecek status koneksi
+    // Method to check connection status
     getConnectionStatus() {
         return this.isConnected;
     }
 }
 
-// Inisialisasi saat halaman dimuat
+// Initialize when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.walletLogin = new SolanaWalletLogin();
 });
