@@ -1,5 +1,5 @@
 let point = 0;
-let pointText;
+let scoreText;
 let ball;
 let particles;
 let emitter;
