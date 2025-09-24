@@ -6,25 +6,487 @@
     <title>Game Tap-Tap Keren</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             margin: 0;
             padding: 0;
-            background: #000;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
         }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        #score-display, #timer-display, #level-display {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        }
+        
+        #score-display {
+            top: 20px;
+            left: 20px;
+            color: #4cd137;
+        }
+        
+        #timer-display {
+            top: 20px;
+            right: 20px;
+            color: #e84118;
+        }
+        
+        #level-display {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00a8ff;
+        }
+        
+        #start-screen, #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 20;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        #game-over-screen {
+            display: none;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00f7ff;
+            color: #00f7ff;
+        }
+        
+        h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #ff9ff3;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #00f7ff 0%, #008cff 100%);
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            pointer-events: auto;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.4);
+            font-weight: bold;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 247, 255, 0.6);
+        }
+        
+        p {
+            font-size: 18px;
+            max-width: 80%;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
         canvas {
             display: block;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+            max-width: 80%;
+        }
+        
+        .instructions h3 {
+            color: #00f7ff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        #final-score {
+            font-size: 60px;
+            color: #4cd137;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(76, 209, 55, 0.5);
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        @media (max-width: 600px) {
+            #game-container {
+                height: 500px;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            h2 {
+                font-size: 28px;
+            }
+            
+            #score-display, #timer-display, #level-display {
+                font-size: 16px;
+                padding: 8px 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="game-container"></div>
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div id="score-display">Skor: 0</div>
+            <div id="timer-display">Waktu: 60</div>
+            <div id="level-display">Level: 1</div>
+        </div>
+        <div id="start-screen">
+            <h1>TAP-TAP GAME</h1>
+            <p>Ketuk target yang muncul secepat mungkin! Dapatkan skor tertinggi sebelum waktu habis.</p>
+            
+            <div class="instructions">
+                <h3>Cara Bermain:</h3>
+                <ul>
+                    <li>Klik target biru untuk mendapatkan poin</li>
+                    <li>Hindari target merah yang mengurangi poin</li>
+                    <li>Setiap level akan semakin menantang</li>
+                    <li>Dapatkan combo dengan mengetuk target berturut-turut</li>
+                </ul>
+            </div>
+            
+            <button id="start-button">MULAI PERMAINAN</button>
+        </div>
+        <div id="game-over-screen">
+            <h2>Permainan Selesai!</h2>
+            <p id="final-score">Skor: 0</p>
+            <p>Level Tertinggi: <span id="highest-level">1</span></p>
+            <button id="restart-button">MAIN LAGI</button>
+        </div>
+    </div>
+    
     <noscript>
         <p>Game ini membutuhkan JavaScript untuk berjalan. Mohon aktifkan di browser Anda.</p>
     </noscript>
-    <script src="js/game.js"></script>
+
+    <script>
+        // Variabel global game
+        let game;
+        let score = 0;
+        let timeLeft = 60;
+        let level = 1;
+        let combo = 0;
+        let maxCombo = 0;
+        let highestLevel = 1;
+        let isGameRunning = false;
+        let timer;
+        
+        // Referensi elemen UI
+        const scoreDisplay = document.getElementById('score-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const levelDisplay = document.getElementById('level-display');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const highestLevelDisplay = document.getElementById('highest-level');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        
+        // Konfigurasi game Phaser
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#0f3460',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+        
+        // Fungsi preload assets
+        function preload() {
+            // Load gambar target
+            this.load.image('blueTarget', 'https://labs.phaser.io/assets/sprites/orb-blue.png');
+            this.load.image('redTarget', 'https://labs.phaser.io/assets/sprites/orb-red.png');
+            this.load.image('background', 'https://labs.phaser.io/assets/skies/space4.png');
+            this.load.image('particle', 'https://labs.phaser.io/assets/particles/blue.png');
+        }
+        
+        // Fungsi create - inisialisasi game objects
+        function create() {
+            // Tambahkan background
+            this.add.image(400, 300, 'background').setDisplaySize(800, 600);
+            
+            // Buat grup untuk target
+            this.blueTargets = this.physics.add.group();
+            this.redTargets = this.physics.add.group();
+            
+            // Buat partikel efek
+            this.particles = this.add.particles('particle');
+            
+            // Emitter untuk efek biru (target baik)
+            this.blueEmitter = this.particles.createEmitter({
+                speed: 100,
+                scale: { start: 0.5, end: 0 },
+                blendMode: 'ADD',
+                lifespan: 500,
+                on: false
+            });
+            
+            // Emitter untuk efek merah (target buruk)
+            this.redEmitter = this.particles.createEmitter({
+                speed: 100,
+                scale: { start: 0.5, end: 0 },
+                blendMode: 'ADD',
+                tint: 0xff0000,
+                lifespan: 500,
+                on: false
+            });
+            
+            // Event untuk menangani klik pada target
+            this.input.on('gameobjectdown', (pointer, gameObject) => {
+                if (!isGameRunning) return;
+                
+                if (gameObject.texture.key === 'blueTarget') {
+                    // Kena target biru - tambah poin dan combo
+                    combo++;
+                    maxCombo = Math.max(maxCombo, combo);
+                    score += level; // Poin berdasarkan level
+                    scoreDisplay.textContent = `Skor: ${score}`;
+                    
+                    // Efek partikel
+                    this.blueEmitter.explode(10, gameObject.x, gameObject.y);
+                    
+                    // Hapus target dan buat yang baru
+                    gameObject.destroy();
+                    spawnBlueTarget(this);
+                    
+                    // Cek jika perlu naik level
+                    if (score % 20 === 0) {
+                        levelUp();
+                    }
+                } 
+                else if (gameObject.texture.key === 'redTarget') {
+                    // Kena target merah - reset combo dan kurangi poin
+                    combo = 0;
+                    score = Math.max(0, score - 5);
+                    scoreDisplay.textContent = `Skor: ${score}`;
+                    
+                    // Efek partikel
+                    this.redEmitter.explode(10, gameObject.x, gameObject.y);
+                    
+                    // Hapus target
+                    gameObject.destroy();
+                }
+            });
+            
+            // Spawn target biru awal
+            for (let i = 0; i < 3; i++) {
+                spawnBlueTarget(this);
+            }
+            
+            // Timer untuk spawn target merah
+            this.time.addEvent({
+                delay: 5000,
+                callback: () => {
+                    if (isGameRunning && this.redTargets.getLength() < 2) {
+                        spawnRedTarget(this);
+                    }
+                },
+                loop: true
+            });
+        }
+        
+        // Fungsi update - logika game loop
+        function update() {
+            // Animasi rotasi target
+            this.blueTargets.getChildren().forEach(target => {
+                target.rotation += 0.01;
+            });
+            
+            this.redTargets.getChildren().forEach(target => {
+                target.rotation += 0.02;
+            });
+        }
+        
+        // Fungsi untuk spawn target biru
+        function spawnBlueTarget(scene) {
+            const x = Phaser.Math.Between(50, 750);
+            const y = Phaser.Math.Between(50, 550);
+            
+            const target = scene.blueTargets.create(x, y, 'blueTarget');
+            target.setInteractive();
+            target.setScale(0.8);
+            
+            // Animasi muncul
+            scene.tweens.add({
+                targets: target,
+                scale: 1,
+                duration: 300,
+                ease: 'Back.easeOut'
+            });
+        }
+        
+        // Fungsi untuk spawn target merah
+        function spawnRedTarget(scene) {
+            const x = Phaser.Math.Between(50, 750);
+            const y = Phaser.Math.Between(50, 550);
+            
+            const target = scene.redTargets.create(x, y, 'redTarget');
+            target.setInteractive();
+            target.setScale(0.8);
+            
+            // Animasi berdenyut
+            scene.tweens.add({
+                targets: target,
+                scale: 0.9,
+                duration: 500,
+                yoyo: true,
+                repeat: -1
+            });
+        }
+        
+        // Fungsi untuk meningkatkan level
+        function levelUp() {
+            level++;
+            highestLevel = Math.max(highestLevel, level);
+            levelDisplay.textContent = `Level: ${level}`;
+            
+            // Tambah target biru setiap naik level
+            if (game && game.scene && game.scene.scenes[0]) {
+                spawnBlueTarget(game.scene.scenes[0]);
+            }
+        }
+        
+        // Fungsi untuk memulai game
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            isGameRunning = true;
+            
+            // Reset variabel game
+            score = 0;
+            timeLeft = 60;
+            level = 1;
+            combo = 0;
+            
+            // Update UI
+            scoreDisplay.textContent = `Skor: ${score}`;
+            timerDisplay.textContent = `Waktu: ${timeLeft}`;
+            levelDisplay.textContent = `Level: ${level}`;
+            
+            // Inisialisasi game Phaser jika belum ada
+            if (!game) {
+                game = new Phaser.Game(config);
+            } else {
+                // Restart scene jika game sudah ada
+                game.scene.restart();
+            }
+            
+            // Mulai timer
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Waktu: ${timeLeft}`;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+        
+        // Fungsi untuk mengakhiri game
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(timer);
+            
+            // Tampilkan layar game over
+            gameOverScreen.style.display = 'flex';
+            finalScoreDisplay.textContent = `Skor: ${score}`;
+            highestLevelDisplay.textContent = highestLevel;
+        }
+        
+        // Event listeners untuk tombol
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+        
+        // Inisialisasi saat halaman dimuat
+        window.addEventListener('load', () => {
+            // Tidak langsung memulai game, tunggu klik pengguna
+            console.log('Game Tap-Tap siap dimainkan!');
+        });
+    </script>
 </body>
 </html>
