@@ -1,5 +1,5 @@
-let score = 0;
-let scoreText;
+let point = 0;
+let pointText;
 let ball;
 let particles;
 let emitter;
@@ -74,8 +74,8 @@ function create() {
     ).setInteractive();
     ball.setDisplaySize(ballSize, ballSize);
 
-    // Tambahkan teks skor
-    scoreText = this.add.text(10, 10, "Score: 0", {
+    // Tambahkan teks point
+    pointText = this.add.text(10, 10, "Point: 0", {
         fontSize: "24px",
         fill: "#fff",
         fontStyle: "bold"
@@ -83,8 +83,8 @@ function create() {
 
     // Event saat bola di-tap atau di-klik
     ball.on("pointerdown", () => {
-        score++;
-        scoreText.setText(`Score: ${score}`);
+        point++;
+        pointText.setText(`Point: ${point}`);
 
         // Pindahkan bola ke posisi acak dengan animasi
         const newX = Phaser.Math.Between(ballSize, this.sys.game.config.width - ballSize);
@@ -101,8 +101,8 @@ function create() {
         // Efek partikel kecil setiap kali klik
         trailEmitter.explode(5, ball.x, ball.y);
 
-        // Cek apakah skor mencapai kelipatan 10 (diubah dari 100 agar lebih sering terlihat)
-        if (score > 0 && score % 10 === 0) {
+        // Cek apakah point mencapai kelipatan 10
+        if (point > 0 && point % 10 === 0) {
             // Ledakan besar di posisi bola
             emitter.explode(50, ball.x, ball.y);
             
