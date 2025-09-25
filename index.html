@@ -25,7 +25,7 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             text-align: center;
         }
@@ -124,6 +124,7 @@
         .btn-game {
             background: linear-gradient(90deg, #667eea, #764ba2);
             margin: 5px;
+            width: 180px;
         }
         
         .game-section {
@@ -131,16 +132,19 @@
         }
         
         .game-selection {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
         
+        .game-content {
+            display: none;
+        }
+        
         .game-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 20px;
             margin-top: 20px;
         }
@@ -150,6 +154,34 @@
             padding: 15px;
             border-radius: 10px;
             text-align: left;
+        }
+        
+        /* Common game styles */
+        .status {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            min-height: 30px;
+        }
+        
+        .winner {
+            color: #4cd137;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        
+        .score {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         /* Tic-Tac-Toe Styles */
@@ -240,31 +272,376 @@
             margin: 10px 0;
         }
         
-        .score {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
+        /* Memory Game Styles */
+        .memory-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
             border-radius: 10px;
         }
         
-        .status {
+        .memory-card {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .memory-card.flipped {
+            background: rgba(76, 209, 55, 0.3);
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card.matched {
+            background: rgba(0, 219, 222, 0.3);
+            cursor: default;
+        }
+        
+        /* Snake Game Styles */
+        .snake-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .snake-board {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 1px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .snake-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+        }
+        
+        .snake-cell.snake {
+            background: #4cd137;
+            border-radius: 4px;
+        }
+        
+        .snake-cell.food {
+            background: #ff4b2b;
+            border-radius: 50%;
+        }
+        
+        .snake-controls {
+            display: grid;
+            grid-template-areas: 
+                ". up ."
+                "left . right"
+                ". down .";
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .snake-up { grid-area: up; }
+        .snake-down { grid-area: down; }
+        .snake-left { grid-area: left; }
+        .snake-right { grid-area: right; }
+        
+        /* Hangman Styles */
+        .hangman-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .hangman-word {
+            font-size: 2rem;
+            letter-spacing: 10px;
             margin: 20px 0;
+        }
+        
+        .hangman-letters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .hangman-letter {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .hangman-letter:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .hangman-letter.used {
+            background: rgba(255, 255, 255, 0.05);
+            cursor: default;
+            color: #666;
+        }
+        
+        .hangman-figure {
+            font-family: monospace;
+            white-space: pre;
             font-size: 1.2rem;
+            margin: 20px 0;
+        }
+        
+        /* Dice Roller Styles */
+        .dice-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .dice-row {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dice-history {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            width: 100%;
+        }
+        
+        /* Number Guesser Styles */
+        .guesser-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .guesser-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 1.2rem;
+            width: 200px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .guesser-feedback {
             min-height: 30px;
+            margin: 10px 0;
         }
         
-        .winner {
-            color: #4cd137;
-            font-weight: bold;
-            animation: pulse 1s infinite;
+        /* Trivia Styles */
+        .trivia-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .trivia-question {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .trivia-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .trivia-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .trivia-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .trivia-option.correct {
+            background: rgba(76, 209, 55, 0.3);
+        }
+        
+        .trivia-option.incorrect {
+            background: rgba(255, 75, 43, 0.3);
+        }
+        
+        /* Reaction Test Styles */
+        .reaction-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .reaction-area {
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+        
+        .reaction-area.waiting {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .reaction-area.ready {
+            background: rgba(76, 209, 55, 0.3);
+        }
+        
+        .reaction-area.too-soon {
+            background: rgba(255, 75, 43, 0.3);
+        }
+        
+        .reaction-results {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        /* Word Scramble Styles */
+        .scramble-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .scramble-word {
+            font-size: 2rem;
+            letter-spacing: 5px;
+            margin: 20px 0;
+        }
+        
+        .scramble-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 1.2rem;
+            width: 300px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        /* Color Match Styles */
+        .color-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .color-target {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .color-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Math Challenge Styles */
+        .math-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .math-problem {
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+        
+        .math-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .math-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .math-option:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .instructions {
@@ -303,14 +680,12 @@
                 font-size: 2rem;
             }
             
-            .rps-choices {
-                gap: 10px;
+            .game-selection {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
             
-            .rps-choice {
-                width: 80px;
-                height: 80px;
-                font-size: 2.5rem;
+            .btn-game {
+                width: 100%;
             }
         }
     </style>
@@ -318,8 +693,8 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-wallet"></i> welcome solana game</h1>
-            <p class="subtitle">Login with your Solana wallet and play games</p>
+            <h1><i class="fas fa-wallet"></i> Solana Wallet Login</h1>
+            <p class="subtitle">Login with your Solana wallet and play 12 different games</p>
         </header>
         
         <div class="card login-section" id="loginSection">
@@ -350,6 +725,36 @@
                 </button>
                 <button class="btn btn-game" id="rpsBtn">
                     <i class="fas fa-hand-rock"></i> Rock-Paper-Scissors
+                </button>
+                <button class="btn btn-game" id="memoryBtn">
+                    <i class="fas fa-brain"></i> Memory Game
+                </button>
+                <button class="btn btn-game" id="snakeBtn">
+                    <i class="fas fa-worm"></i> Snake
+                </button>
+                <button class="btn btn-game" id="hangmanBtn">
+                    <i class="fas fa-person-hanging"></i> Hangman
+                </button>
+                <button class="btn btn-game" id="diceBtn">
+                    <i class="fas fa-dice"></i> Dice Roller
+                </button>
+                <button class="btn btn-game" id="guesserBtn">
+                    <i class="fas fa-question"></i> Number Guesser
+                </button>
+                <button class="btn btn-game" id="triviaBtn">
+                    <i class="fas fa-question-circle"></i> Trivia
+                </button>
+                <button class="btn btn-game" id="reactionBtn">
+                    <i class="fas fa-bolt"></i> Reaction Test
+                </button>
+                <button class="btn btn-game" id="scrambleBtn">
+                    <i class="fas fa-scroll"></i> Word Scramble
+                </button>
+                <button class="btn btn-game" id="colorBtn">
+                    <i class="fas fa-palette"></i> Color Match
+                </button>
+                <button class="btn btn-game" id="mathBtn">
+                    <i class="fas fa-calculator"></i> Math Challenge
                 </button>
             </div>
             
@@ -421,6 +826,328 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- Memory Game -->
+            <div class="game-content" id="memoryGame" style="display: none;">
+                <h3>Memory Game</h3>
+                <p class="status" id="memoryStatus">Find all matching pairs!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Pairs Found: <span id="pairsFound">0</span>/8</p>
+                        <p>Moves: <span id="memoryMoves">0</span></p>
+                        
+                        <div class="score">
+                            <div>Games Played: <span id="memoryGames">0</span></div>
+                            <div>Best Score: <span id="memoryBest">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="resetMemory" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> New Game
+                        </button>
+                    </div>
+                    
+                    <div class="memory-board" id="memoryBoard">
+                        <!-- Cards will be filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Snake Game -->
+            <div class="game-content" id="snakeGame" style="display: none;">
+                <h3>Snake</h3>
+                <p class="status" id="snakeStatus">Use arrow keys to control the snake!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Score: <span id="snakeScore">0</span></p>
+                        <p>Length: <span id="snakeLength">3</span></p>
+                        
+                        <div class="score">
+                            <div>High Score: <span id="snakeHighScore">0</span></div>
+                            <div>Games Played: <span id="snakeGames">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="resetSnake" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> New Game
+                        </button>
+                        
+                        <div class="snake-controls">
+                            <button class="btn snake-up" id="snakeUp">↑</button>
+                            <button class="btn snake-left" id="snakeLeft">←</button>
+                            <button class="btn snake-down" id="snakeDown">↓</button>
+                            <button class="btn snake-right" id="snakeRight">→</button>
+                        </div>
+                    </div>
+                    
+                    <div class="snake-board" id="snakeBoard">
+                        <!-- Snake cells will be filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hangman Game -->
+            <div class="game-content" id="hangmanGame" style="display: none;">
+                <h3>Hangman</h3>
+                <p class="status" id="hangmanStatus">Guess the word before the hangman is complete!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Remaining Guesses: <span id="hangmanGuesses">6</span></p>
+                        <p>Category: <span id="hangmanCategory">Animals</span></p>
+                        
+                        <div class="score">
+                            <div>Wins: <span id="hangmanWins">0</span></div>
+                            <div>Losses: <span id="hangmanLosses">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="resetHangman" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> New Word
+                        </button>
+                    </div>
+                    
+                    <div class="hangman-container">
+                        <div class="hangman-figure" id="hangmanFigure">
+                            -----
+                            |   |
+                            |   
+                            |   
+                            |   
+                            |
+                        </div>
+                        <div class="hangman-word" id="hangmanWord"></div>
+                        <div class="hangman-letters" id="hangmanLetters">
+                            <!-- Letters will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dice Roller Game -->
+            <div class="game-content" id="diceGame" style="display: none;">
+                <h3>Dice Roller</h3>
+                <p class="status" id="diceStatus">Roll the dice and try to get the highest score!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Current Roll: <span id="diceTotal">0</span></p>
+                        <p>Rolls: <span id="diceRolls">0</span></p>
+                        
+                        <div class="score">
+                            <div>Best Roll: <span id="diceBest">0</span></div>
+                            <div>Average: <span id="diceAverage">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="rollDice" style="margin-top: 15px;">
+                            <i class="fas fa-dice"></i> Roll Dice
+                        </button>
+                    </div>
+                    
+                    <div class="dice-container">
+                        <div class="dice-row">
+                            <div class="dice" id="dice1">1</div>
+                            <div class="dice" id="dice2">1</div>
+                            <div class="dice" id="dice3">1</div>
+                        </div>
+                        <div class="dice-history" id="diceHistory">
+                            <!-- Dice history will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Number Guesser Game -->
+            <div class="game-content" id="guesserGame" style="display: none;">
+                <h3>Number Guesser</h3>
+                <p class="status" id="guesserStatus">I'm thinking of a number between 1 and 100. Can you guess it?</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Guesses: <span id="guesserAttempts">0</span></p>
+                        <p>Range: 1 - 100</p>
+                        
+                        <div class="score">
+                            <div>Games Played: <span id="guesserGames">0</span></div>
+                            <div>Best Score: <span id="guesserBest">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="resetGuesser" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> New Number
+                        </button>
+                    </div>
+                    
+                    <div class="guesser-container">
+                        <input type="number" class="guesser-input" id="guesserInput" min="1" max="100" placeholder="Enter your guess">
+                        <button class="btn" id="submitGuess">
+                            <i class="fas fa-check"></i> Submit Guess
+                        </button>
+                        <div class="guesser-feedback" id="guesserFeedback"></div>
+                        <div class="guesser-history" id="guesserHistory">
+                            <!-- Guess history will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trivia Game -->
+            <div class="game-content" id="triviaGame" style="display: none;">
+                <h3>Trivia</h3>
+                <p class="status" id="triviaStatus">Test your knowledge with these trivia questions!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Question: <span id="triviaCurrent">1</span>/10</p>
+                        <p>Category: <span id="triviaCategory">General</span></p>
+                        
+                        <div class="score">
+                            <div>Correct: <span id="triviaCorrect">0</span></div>
+                            <div>Incorrect: <span id="triviaIncorrect">0</span></div>
+                        </div>
+                        
+                        <button class="btn" id="nextTrivia" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-right"></i> Next Question
+                        </button>
+                    </div>
+                    
+                    <div class="trivia-container">
+                        <div class="trivia-question" id="triviaQuestion"></div>
+                        <div class="trivia-options" id="triviaOptions">
+                            <!-- Options will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reaction Test Game -->
+            <div class="game-content" id="reactionGame" style="display: none;">
+                <h3>Reaction Test</h3>
+                <p class="status" id="reactionStatus">Click when the color changes to green!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Last Reaction: <span id="reactionLast">0</span> ms</p>
+                        <p>Best Reaction: <span id="reactionBest">0</span> ms</p>
+                        
+                        <div class="score">
+                            <div>Tests: <span id="reactionTests">0</span></div>
+                            <div>Average: <span id="reactionAverage">0</span> ms</div>
+                        </div>
+                        
+                        <button class="btn" id="startReaction" style="margin-top: 15px;">
+                            <i class="fas fa-play"></i> Start Test
+                        </button>
+                    </div>
+                    
+                    <div class="reaction-container">
+                        <div class="reaction-area waiting" id="reactionArea">
+                            Wait for green...
+                        </div>
+                        <div class="reaction-results" id="reactionResults">
+                            <!-- Results will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Word Scramble Game -->
+            <div class="game-content" id="scrambleGame" style="display: none;">
+                <h3>Word Scramble</h3>
+                <p class="status" id="scrambleStatus">Unscramble the word!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Words Solved: <span id="scrambleSolved">0</span></p>
+                        <p>Category: <span id="scrambleCategory">Common Words</span></p>
+                        
+                        <div class="score">
+                            <div>Total Words: <span id="scrambleTotal">0</span></div>
+                            <div>Success Rate: <span id="scrambleRate">0</span>%</div>
+                        </div>
+                        
+                        <button class="btn" id="nextScramble" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-right"></i> Next Word
+                        </button>
+                    </div>
+                    
+                    <div class="scramble-container">
+                        <div class="scramble-word" id="scrambleWord"></div>
+                        <input type="text" class="scramble-input" id="scrambleInput" placeholder="Enter the unscrambled word">
+                        <button class="btn" id="checkScramble">
+                            <i class="fas fa-check"></i> Check Answer
+                        </button>
+                        <div class="scramble-feedback" id="scrambleFeedback"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Color Match Game -->
+            <div class="game-content" id="colorGame" style="display: none;">
+                <h3>Color Match</h3>
+                <p class="status" id="colorStatus">Select the color that matches the target!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Correct: <span id="colorCorrect">0</span></p>
+                        <p>Incorrect: <span id="colorIncorrect">0</span></p>
+                        
+                        <div class="score">
+                            <div>Total: <span id="colorTotal">0</span></div>
+                            <div>Accuracy: <span id="colorAccuracy">0</span>%</div>
+                        </div>
+                        
+                        <button class="btn" id="nextColor" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-right"></i> Next Color
+                        </button>
+                    </div>
+                    
+                    <div class="color-container">
+                        <div class="color-target" id="colorTarget"></div>
+                        <div class="color-options" id="colorOptions">
+                            <!-- Color options will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Math Challenge Game -->
+            <div class="game-content" id="mathGame" style="display: none;">
+                <h3>Math Challenge</h3>
+                <p class="status" id="mathStatus">Solve the math problem as quickly as you can!</p>
+                
+                <div class="game-container">
+                    <div class="game-info">
+                        <h3>Game Information</h3>
+                        <p>Correct: <span id="mathCorrect">0</span></p>
+                        <p>Incorrect: <span id="mathIncorrect">0</span></p>
+                        
+                        <div class="score">
+                            <div>Total: <span id="mathTotal">0</span></div>
+                            <div>Average Time: <span id="mathAverage">0</span>s</div>
+                        </div>
+                        
+                        <button class="btn" id="nextMath" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-right"></i> Next Problem
+                        </button>
+                    </div>
+                    
+                    <div class="math-container">
+                        <div class="math-problem" id="mathProblem"></div>
+                        <div class="math-options" id="mathOptions">
+                            <!-- Math options will be filled by JavaScript -->
+                        </div>
+                        <div class="math-timer" id="mathTimer">Time: 0s</div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="instructions">
@@ -428,18 +1155,18 @@
             <ol>
                 <li>Make sure you have a Solana wallet (like Phantom) installed in your browser</li>
                 <li>Click the "Connect Wallet" button to connect your wallet</li>
-                <li>After connecting, select a game to play</li>
-                <li>Play Tic-Tac-Toe against the computer or test your luck with Rock-Paper-Scissors</li>
-                <li>Your game scores will be tracked during your session</li>
+                <li>After connecting, select a game to play from the 12 available options</li>
+                <li>Each game has its own rules and scoring system</li>
+                <li>Your scores will be tracked during your session</li>
             </ol>
         </div>
         
         <footer>
-            <p>game solana &copy; 2025</p>
+            <p>Solana Wallet Login Demo with 12 Games &copy; 2023</p>
         </footer>
     </div>
 
-    <script src="js/login.js"></script>
-    <script src="js/game.js"></script>
+    <script src="login.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
