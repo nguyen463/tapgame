@@ -81,11 +81,8 @@ class SolanaWalletLogin {
         await this.getWalletBalance();
         
         // Initialize games after wallet is connected
-        if (typeof ticTacToeGame !== 'undefined') {
-            ticTacToeGame.init();
-        }
-        if (typeof rpsGame !== 'undefined') {
-            rpsGame.init();
+        if (typeof gameManager !== 'undefined') {
+            gameManager.initAllGames();
         }
     }
     
@@ -100,11 +97,8 @@ class SolanaWalletLogin {
         this.gameSection.style.display = 'none';
         
         // Reset game states
-        if (typeof ticTacToeGame !== 'undefined') {
-            ticTacToeGame.resetGame();
-        }
-        if (typeof rpsGame !== 'undefined') {
-            rpsGame.resetGame();
+        if (typeof gameManager !== 'undefined') {
+            gameManager.resetAllGames();
         }
     }
     
